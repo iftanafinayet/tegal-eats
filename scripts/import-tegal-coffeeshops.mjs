@@ -34,14 +34,13 @@ loadEnvFile();
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 const foursquareApiKey = process.env.REACT_APP_FOURSQUARE_API_KEY;
-const mapboxAccessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing Supabase env vars. Set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY.");
 }
 
-if (!foursquareApiKey && !mapboxAccessToken) {
-  throw new Error("Missing provider keys. Set REACT_APP_FOURSQUARE_API_KEY or REACT_APP_MAPBOX_ACCESS_TOKEN.");
+if (!foursquareApiKey) {
+  throw new Error("Missing provider key. Set REACT_APP_FOURSQUARE_API_KEY.");
 }
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -119,45 +118,27 @@ async function fetchFoursquare(endpoint, params) {
 
 async function collectInternetPlaces() {
   const collected = [];
-  let foursquareAvailable = Boolean(foursquareApiKey);
+  for (const point of searchPoints) {
+    for (const term of searchTerms) {
+      const [searchPayload, nearbyPayload] = await Promise.all([
+        fetchFoursquare("https://api.foursquare.com/v3/places/search", {
+          query: term,
+          ll: `${point.lat},${point.lng}`,
+          radius: 7000,
+          limit: 20,
+          sort: "RELEVANCE",
+          fields: "fsq_id,name,location,geocodes,categories,chains",
+        }),
+        fetchFoursquare("https://api.foursquare.com/v3/places/nearby", {
+          query: term,
+          ll: `${point.lat},${point.lng}`,
+          limit: 20,
+          fields: "fsq_id,name,location,geocodes,categories,chains",
+        }),
+      ]);
 
-  if (foursquareAvailable) {
-    try {
-      for (const point of searchPoints) {
-        for (const term of searchTerms) {
-          const [searchPayload, nearbyPayload] = await Promise.all([
-            fetchFoursquare("https://api.foursquare.com/v3/places/search", {
-              query: term,
-              ll: `${point.lat},${point.lng}`,
-              radius: 7000,
-              limit: 20,
-              sort: "RELEVANCE",
-              fields: "fsq_id,name,location,geocodes,categories,chains",
-            }),
-            fetchFoursquare("https://api.foursquare.com/v3/places/nearby", {
-              query: term,
-              ll: `${point.lat},${point.lng}`,
-              limit: 20,
-              fields: "fsq_id,name,location,geocodes,categories,chains",
-            }),
-          ]);
-
-          collected.push(...(searchPayload.results || []), ...(nearbyPayload.results || []));
-        }
-      }
-    } catch (error) {
-      if (String(error.message || "").includes("401")) {
-        foursquareAvailable = false;
-        console.warn("Foursquare key rejected. Falling back to Mapbox seed.");
-      } else {
-        throw error;
-      }
+      collected.push(...(searchPayload.results || []), ...(nearbyPayload.results || []));
     }
-  }
-
-  if (!foursquareAvailable && mapboxAccessToken) {
-    const mapboxPlaces = await collectMapboxPlaces();
-    collected.push(...mapboxPlaces);
   }
 
   const deduped = [];
@@ -175,30 +156,6 @@ async function collectInternetPlaces() {
 
   return deduped;
 }
-
-function createMapboxSessionToken() {
-  return `seed-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-async function fetchMapboxRetrieve(mapboxId, sessionToken) {
-  const endpoint = new URL(`https://api.mapbox.com/search/searchbox/v1/retrieve/${encodeURIComponent(mapboxId)}`);
-  endpoint.searchParams.set("access_token", mapboxAccessToken);
-  endpoint.searchParams.set("session_token", sessionToken);
-  endpoint.searchParams.set("language", "id");
-
-  const response = await fetch(endpoint, {
-    headers: {
-      Accept: "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Mapbox retrieve HTTP ${response.status}`);
-  }
-
-  return await response.json();
-}
-
 async function fetchWithRetry(url, options, label) {
   let lastError = null;
 
@@ -217,144 +174,6 @@ async function fetchWithRetry(url, options, label) {
   }
 
   throw lastError || new Error(`${label} failed`);
-}
-
-async function collectMapboxPlaces() {
-  const results = [];
-  const useManualNames = process.argv.includes("--from-manual-names");
-
-  if (useManualNames) {
-    const manualNames = loadManualSeedNames();
-
-    for (const name of manualNames) {
-      const sessionToken = createMapboxSessionToken();
-      const endpoint = new URL("https://api.mapbox.com/search/searchbox/v1/suggest");
-      endpoint.searchParams.set("q", `${name} Tegal`);
-      endpoint.searchParams.set("access_token", mapboxAccessToken);
-      endpoint.searchParams.set("session_token", sessionToken);
-      endpoint.searchParams.set("limit", "3");
-      endpoint.searchParams.set("country", "id");
-      endpoint.searchParams.set("types", "poi");
-      endpoint.searchParams.set("poi_category", "coffee,cafe");
-      endpoint.searchParams.set("bbox", "108.997,-6.98,109.22,-6.8");
-      endpoint.searchParams.set("proximity", `${searchPoints[0].lng},${searchPoints[0].lat}`);
-      endpoint.searchParams.set("language", "id");
-
-      const response = await fetchWithRetry(
-        endpoint,
-        { headers: { Accept: "application/json" } },
-        "Mapbox suggest"
-      );
-
-      const payload = await response.json();
-      const suggestion = (payload.suggestions || [])[0];
-
-      if (!suggestion) {
-        results.push({
-          fsq_id: `manual:${name}`,
-          name,
-          location: {
-            formatted_address: "Tegal, Jawa Tengah",
-          },
-          geocodes: {
-            main: {
-              latitude: null,
-              longitude: null,
-            },
-          },
-          categories: [],
-        });
-        continue;
-      }
-
-      const retrievePayload = await fetchMapboxRetrieve(suggestion.mapbox_id, sessionToken);
-      const feature = retrievePayload.features?.[0];
-      const longitude = feature?.properties?.coordinates?.longitude ?? feature?.geometry?.coordinates?.[0];
-      const latitude = feature?.properties?.coordinates?.latitude ?? feature?.geometry?.coordinates?.[1];
-      const address =
-        feature?.properties?.full_address ||
-        feature?.properties?.place_formatted ||
-        suggestion.full_address ||
-        suggestion.place_formatted ||
-        "Tegal, Jawa Tengah";
-
-      results.push({
-        fsq_id: `mapbox:${suggestion.mapbox_id}`,
-        name: suggestion.name || name,
-        location: {
-          formatted_address: address,
-        },
-        geocodes: {
-          main: {
-            latitude,
-            longitude,
-          },
-        },
-        categories: [],
-      });
-
-      await sleep(350);
-    }
-
-    return results;
-  }
-
-  for (const point of searchPoints) {
-    for (const term of searchTerms) {
-      const sessionToken = createMapboxSessionToken();
-      const endpoint = new URL("https://api.mapbox.com/search/searchbox/v1/suggest");
-      endpoint.searchParams.set("q", `${term} tegal`);
-      endpoint.searchParams.set("access_token", mapboxAccessToken);
-      endpoint.searchParams.set("session_token", sessionToken);
-      endpoint.searchParams.set("limit", "10");
-      endpoint.searchParams.set("country", "id");
-      endpoint.searchParams.set("types", "poi");
-      endpoint.searchParams.set("poi_category", "coffee,cafe");
-      endpoint.searchParams.set("bbox", "108.997,-6.98,109.22,-6.8");
-      endpoint.searchParams.set("proximity", `${point.lng},${point.lat}`);
-      endpoint.searchParams.set("language", "id");
-
-      const response = await fetchWithRetry(
-        endpoint,
-        {
-          headers: {
-            Accept: "application/json",
-          },
-        },
-        "Mapbox suggest"
-      );
-      const payload = await response.json();
-      for (const suggestion of payload.suggestions || []) {
-        const retrievePayload = await fetchMapboxRetrieve(suggestion.mapbox_id, sessionToken);
-        const feature = retrievePayload.features?.[0];
-        const longitude = feature?.properties?.coordinates?.longitude ?? feature?.geometry?.coordinates?.[0];
-        const latitude = feature?.properties?.coordinates?.latitude ?? feature?.geometry?.coordinates?.[1];
-        const address =
-          feature?.properties?.full_address ||
-          feature?.properties?.place_formatted ||
-          suggestion.full_address ||
-          suggestion.place_formatted ||
-          suggestion.name;
-
-        results.push({
-          fsq_id: `mapbox:${suggestion.mapbox_id}`,
-          name: suggestion.name,
-          location: {
-            formatted_address: address,
-          },
-          geocodes: {
-            main: {
-              latitude,
-              longitude,
-            },
-          },
-          categories: [],
-        });
-      }
-    }
-  }
-
-  return results;
 }
 
 async function loadExistingPlaces() {

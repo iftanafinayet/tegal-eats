@@ -69,101 +69,10 @@ type SearchSuggestion = {
   id: string;
   label: string;
   secondaryText?: string;
-  source: "mapbox";
   lat?: number;
   lng?: number;
   address?: string;
 };
-
-type MapboxFeature = {
-  id: string;
-  text?: string;
-  place_name: string;
-  center?: [number, number];
-  properties?: {
-    category?: string;
-    maki?: string;
-  };
-};
-
-const TEGAL_BBOX = {
-  minLng: 108.997,
-  minLat: -6.98,
-  maxLng: 109.22,
-  maxLat: -6.8,
-};
-
-const TEGAL_CENTER = {
-  lng: 109.1402,
-  lat: -6.8693,
-};
-
-const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN?.trim() || "";
-const COFFEE_HINTS = ["coffee", "kopi", "cafe", "caf", "espresso", "kedai", "roastery"];
-
-function normalizeSearchValue(value: string) {
-  return value.toLowerCase().trim().replace(/\s+/g, " ");
-}
-
-function buildMapboxSearchQuery(query: string) {
-  const normalizedQuery = normalizeSearchValue(query);
-  const hasCoffeeHint = COFFEE_HINTS.some((hint) => normalizedQuery.includes(hint));
-
-  if (hasCoffeeHint) {
-    return `${query} Tegal`;
-  }
-
-  return `${query} coffee shop cafe Tegal`;
-}
-
-function scoreMapboxFeature(feature: MapboxFeature) {
-  const categoryText = `${feature.properties?.category || ""} ${feature.properties?.maki || ""} ${feature.place_name}`.toLowerCase();
-  let score = 0;
-
-  if (categoryText.includes("coffee")) score += 4;
-  if (categoryText.includes("cafe")) score += 3;
-  if (categoryText.includes("kopi")) score += 3;
-  if (categoryText.includes("tea")) score -= 1;
-  if (categoryText.includes("restaurant")) score -= 1;
-
-  return score;
-}
-
-async function fetchMapboxFeatures(
-  query: string,
-  options: {
-    signal: AbortSignal;
-    limit?: number;
-    types?: string;
-  }
-) {
-  const endpoint = new URL(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json`);
-  endpoint.searchParams.set("access_token", MAPBOX_ACCESS_TOKEN);
-  endpoint.searchParams.set("limit", String(options.limit || 5));
-  endpoint.searchParams.set("country", "id");
-  endpoint.searchParams.set("bbox", `${TEGAL_BBOX.minLng},${TEGAL_BBOX.minLat},${TEGAL_BBOX.maxLng},${TEGAL_BBOX.maxLat}`);
-  endpoint.searchParams.set("proximity", `${TEGAL_CENTER.lng},${TEGAL_CENTER.lat}`);
-  endpoint.searchParams.set("language", "id");
-  endpoint.searchParams.set("autocomplete", "true");
-
-  if (options.types) {
-    endpoint.searchParams.set("types", options.types);
-  }
-
-  const response = await fetch(endpoint.toString(), {
-    signal: options.signal,
-    headers: {
-      Accept: "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  const payload = (await response.json()) as { features?: MapboxFeature[] };
-  return payload.features || [];
-}
 
 export function AddPlace() {
   const navigate = useNavigate();
@@ -309,78 +218,41 @@ export function AddPlace() {
     }
 
     setIsSearchingRemote(true);
-    setSearchSuggestionError(null);
-    const controller = new AbortController();
-
     const timeoutId = window.setTimeout(() => {
-      if (!MAPBOX_ACCESS_TOKEN) {
-        setRemoteSuggestions([]);
-        setSearchSuggestionError("Set `REACT_APP_MAPBOX_ACCESS_TOKEN` untuk menyalakan pencarian tempat.");
-        setIsSearchingRemote(false);
-        return;
+      const normalizedQuery = query.toLowerCase();
+      const nextSuggestions: SearchSuggestion[] = [];
+
+      if (position) {
+        nextSuggestions.push({
+          id: "current-location",
+          label: query,
+          secondaryText: `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`,
+          lat: position.lat,
+          lng: position.lng,
+          address: address.trim() || formatLocationDetail(position.lat, position.lng),
+        });
       }
 
-      const boostedQuery = buildMapboxSearchQuery(query);
-
-      Promise.all([
-        fetchMapboxFeatures(query, {
-          signal: controller.signal,
-          limit: 5,
-          types: "poi",
-        }),
-        fetchMapboxFeatures(boostedQuery, {
-          signal: controller.signal,
-          limit: 5,
-          types: "poi,address",
-        }),
-      ])
-        .then(([poiFeatures, fallbackFeatures]) => {
-          const mergedFeatures = [...poiFeatures, ...fallbackFeatures].filter((feature, index, all) => {
-            return all.findIndex((item) => item.id === feature.id) === index;
-          });
-
-          const nextSuggestions = mergedFeatures
-            .filter((feature) => {
-              const placeType = feature.id.split(".")[0];
-              return placeType === "poi" || placeType === "address";
-            })
-            .sort((left, right) => scoreMapboxFeature(right) - scoreMapboxFeature(left))
-            .slice(0, 5)
-            .map<SearchSuggestion>((item) => {
-              const label = item.text?.trim() || item.place_name.split(",")[0]?.trim() || item.place_name;
-              const secondaryText = item.place_name.startsWith(label)
-                ? item.place_name.slice(label.length).replace(/^,\s*/, "")
-                : item.place_name;
-
-              return {
-                id: `mapbox-${item.id}`,
-                label,
-                secondaryText,
-                source: "mapbox",
-                lat: item.center?.[1],
-                lng: item.center?.[0],
-                address: item.place_name,
-              };
-            });
-
-          setRemoteSuggestions(nextSuggestions);
-          setIsSearchingRemote(false);
-        })
-        .catch((requestError: any) => {
-          if (requestError?.name === "AbortError") return;
-
-          console.error("Failed to load Mapbox search suggestions:", requestError);
-          setRemoteSuggestions([]);
-          setSearchSuggestionError("Autocomplete tempat sedang bermasalah.");
-          setIsSearchingRemote(false);
+      if (address.trim() && !normalizedQuery.includes(address.trim().toLowerCase())) {
+        nextSuggestions.push({
+          id: "typed-address",
+          label: query,
+          secondaryText: address.trim(),
+          lat: position?.lat,
+          lng: position?.lng,
+          address: address.trim(),
         });
+      }
+
+      setRemoteSuggestions(nextSuggestions);
+      setSearchSuggestionError(nextSuggestions.length === 0 ? "Tidak ada autocomplete eksternal. Isi nama tempat secara manual." : null);
+      setIsSearchingRemote(false);
     }, 450);
 
     return () => {
-      controller.abort();
       window.clearTimeout(timeoutId);
     };
-  }, [name, showSearchSuggestions]);
+  }, [address, name, position, showSearchSuggestions]);
 
   const handleSelectSuggestion = (suggestion: SearchSuggestion) => {
     setName(suggestion.label);
@@ -526,7 +398,7 @@ export function AddPlace() {
                         handleSelectSuggestion(remoteSuggestions[activeSuggestionIndex]);
                       }
                     }}
-                    placeholder="e.g. Arabica Reserve"
+                    placeholder="Contoh: Arabica Reserve"
                     className="w-full px-5 py-4 rounded-xl border border-outline-variant/10 bg-surface-container-lowest focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-on-surface font-semibold placeholder:text-on-surface-variant/40 placeholder:font-normal"
                   />
 
@@ -559,7 +431,7 @@ export function AddPlace() {
                             {isSearchingRemote ? (
                               <div className="flex items-center gap-2">
                                 <span className="material-symbols-outlined animate-spin text-primary text-sm">sync</span>
-                                Mencari tempat...
+                                Menyiapkan saran...
                               </div>
                             ) : (
                               searchSuggestionError || "Tidak ada hasil yang ditemukan."
@@ -590,10 +462,10 @@ export function AddPlace() {
                 </motion.div>
 
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
-                  <label className="block text-[10px] uppercase tracking-widest font-headline font-bold text-on-surface-variant mb-3">Detail Lokasi</label>
-                  <input
-                    type="text"
-                    value={address}
+                <label className="block text-[10px] uppercase tracking-widest font-headline font-bold text-on-surface-variant mb-3">Detail Lokasi</label>
+                <input
+                  type="text"
+                  value={address}
                     onChange={(e) => {
                       setAddress(e.target.value);
                       setIsAddressAutoFilled(false);
@@ -604,7 +476,7 @@ export function AddPlace() {
                   <p className="text-xs text-on-surface-variant mt-2">
                     {hasPrefilledCoordinates
                       ? "Lokasi awal sudah diisi dari hasil pencarian. Kamu masih bisa geser pin atau edit alamat."
-                      : "Saat menambah tempat, koordinat dan detail lokasi akan mengikuti posisi user yang sedang berada di titik tersebut."}
+                      : "Saat menambah tempat, koordinat dan detail lokasi akan mengikuti posisi user yang sedang berada di titik tersebut. Nama tempat diisi manual."}
                   </p>
                 </motion.div>
               </div>
