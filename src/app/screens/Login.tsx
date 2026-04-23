@@ -84,27 +84,28 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-surface text-on-surface">
+    <div className="min-h-screen overflow-hidden bg-background text-on-surface">
       <div className="relative mx-auto flex min-h-screen w-full max-w-[1600px] flex-col lg:grid lg:grid-cols-[0.95fr_1.05fr]">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute bottom-[-12%] right-[-6%] h-96 w-96 rounded-full bg-secondary-container/35 blur-3xl" />
+          <div className="absolute left-[-10%] top-[-8%] h-72 w-72 rounded-full bg-primary/18 blur-3xl" />
+          <div className="absolute bottom-[-12%] right-[-6%] h-96 w-96 rounded-full bg-primary-container/30 blur-3xl" />
         </div>
 
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary-container to-secondary-container px-6 pb-12 pt-10 text-on-primary lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-12 lg:py-10">
+        <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,121,73,0.42),_transparent_32%),linear-gradient(135deg,_#a63300_0%,_#c9470f_42%,_#ff7949_100%)] px-6 pb-12 pt-10 text-on-primary lg:flex lg:min-h-screen lg:flex-col lg:justify-between lg:px-12 lg:py-10">
           <div className="absolute inset-0">
             <div className="absolute right-[-12%] top-10 h-72 w-72 rounded-full bg-white/18 blur-3xl" />
-            <div className="absolute bottom-0 left-[-8%] h-80 w-80 rounded-full bg-secondary/20 blur-3xl" />
+            <div className="absolute bottom-0 left-[-8%] h-80 w-80 rounded-full bg-primary-dim/30 blur-3xl" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),transparent_40%,rgba(69,16,0,0.18))]" />
           </div>
 
           <div className="relative z-10 flex items-center justify-between">
             <button
               onClick={() => navigate("/home")}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-surface/18 backdrop-blur-xl transition-transform hover:scale-[1.03]"
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/12 backdrop-blur-xl transition-transform hover:scale-[1.03]"
             >
               <ArrowLeft size={20} />
             </button>
-            <div className="inline-flex items-center gap-2 rounded-full bg-surface/18 px-4 py-2 backdrop-blur-xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/12 px-4 py-2 backdrop-blur-xl">
               <Sparkles size={14} />
               <span className="font-headline text-[10px] font-black uppercase tracking-[0.24em]">
                 Editorial Auth
@@ -118,16 +119,16 @@ export function Login() {
             transition={{ duration: 0.7 }}
             className="relative z-10 mt-16 lg:mt-0"
           >
-            <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-surface text-primary shadow-[0_22px_48px_rgba(47,47,46,0.08)] lg:h-28 lg:w-28">
+            <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] border border-white/20 bg-white/90 text-primary shadow-[0_22px_48px_rgba(69,16,0,0.2)] lg:h-28 lg:w-28">
               <Waves size={42} strokeWidth={2.5} />
             </div>
-            <p className="font-headline text-[10px] font-black uppercase tracking-[0.28em] text-white/72">
+            <p className="font-headline text-[10px] font-black uppercase tracking-[0.28em] text-on-primary/80">
               Digital Concierge for Food Discovery
             </p>
             <h1 className="mt-4 max-w-xl font-headline text-5xl font-black leading-[0.92] tracking-[-0.05em] lg:text-7xl">
               {isLogin ? "Masuk ke flow discovery yang lebih rapi." : "Bikin akun untuk simpan taste dan momentum."}
             </h1>
-            <p className="mt-5 max-w-lg text-sm leading-7 text-white/78 lg:text-base">
+            <p className="mt-5 max-w-lg text-sm leading-7 text-on-primary/80 lg:text-base">
               TegalEats dirancang seperti magazine board: warm, curated, dan cepat dibaca. Login memberi akses ke favorit, planner, review, dan konteks sosial yang lebih personal.
             </p>
           </motion.div>
@@ -147,8 +148,8 @@ export function Login() {
           transition={{ delay: 0.1, duration: 0.65 }}
           className="relative flex items-center px-6 py-8 lg:px-12 lg:py-12"
         >
-          <div className="w-full rounded-[2.5rem] bg-surface-container-low p-5 shadow-[0_18px_60px_rgba(47,47,46,0.06)] lg:rounded-[3rem] lg:p-8">
-            <div className="mx-auto max-w-lg rounded-[2rem] bg-surface-container-lowest p-6 shadow-[0_16px_40px_rgba(47,47,46,0.05)] lg:p-8">
+          <div className="w-full rounded-[2.5rem] border border-primary/10 bg-[linear-gradient(180deg,rgba(255,121,73,0.08),rgba(255,255,255,0.78))] p-5 shadow-[0_18px_60px_rgba(166,51,0,0.08)] lg:rounded-[3rem] lg:p-8">
+            <div className="mx-auto max-w-lg rounded-[2rem] border border-primary/10 bg-surface-container-lowest p-6 shadow-[0_16px_40px_rgba(166,51,0,0.07)] lg:p-8">
               <div className="mb-8">
                 <p className="font-headline text-[10px] font-black uppercase tracking-[0.25em] text-primary">
                   {isLogin ? "Member Access" : "Create Account"}
@@ -165,7 +166,7 @@ export function Login() {
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                 {success && (
-                  <div className="rounded-[1.5rem] bg-primary/8 px-4 py-3 text-sm font-medium text-primary">
+                  <div className="rounded-[1.5rem] border border-primary/10 bg-primary/8 px-4 py-3 text-sm font-medium text-primary">
                     {success}
                   </div>
                 )}
@@ -190,7 +191,7 @@ export function Login() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="halo@tegaleats.com"
-                      className="w-full rounded-3xl bg-surface-container-high px-11 py-4 pr-4 text-on-surface outline-none ring-1 ring-transparent transition-all placeholder:text-on-surface-variant focus:bg-surface-container-lowest focus:ring-primary/40"
+                      className="w-full rounded-3xl border border-primary/10 bg-surface-container-high px-11 py-4 pr-4 text-on-surface outline-none ring-1 ring-transparent transition-all placeholder:text-on-surface-variant focus:border-primary/20 focus:bg-surface-container-lowest focus:ring-primary/40"
                     />
                   </div>
                 </div>
@@ -209,7 +210,7 @@ export function Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Minimal 6 karakter"
-                      className="w-full rounded-3xl bg-surface-container-high px-11 py-4 pr-4 text-on-surface outline-none ring-1 ring-transparent transition-all placeholder:text-on-surface-variant focus:bg-surface-container-lowest focus:ring-primary/40"
+                      className="w-full rounded-3xl border border-primary/10 bg-surface-container-high px-11 py-4 pr-4 text-on-surface outline-none ring-1 ring-transparent transition-all placeholder:text-on-surface-variant focus:border-primary/20 focus:bg-surface-container-lowest focus:ring-primary/40"
                     />
                   </div>
                 </div>
@@ -219,7 +220,7 @@ export function Login() {
                   whileTap={{ scale: loading ? 1 : 0.98 }}
                   disabled={loading}
                   type="submit"
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-[1.75rem] bg-gradient-to-r from-primary to-primary-container py-4 font-headline font-black text-on-primary shadow-[0_18px_48px_rgba(166,51,0,0.24)] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-[1.75rem] bg-[linear-gradient(90deg,#a63300_0%,#c9470f_48%,#ff7949_100%)] py-4 font-headline font-black text-on-primary shadow-[0_18px_48px_rgba(166,51,0,0.28)] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {loading ? (
                     "Memproses..."
@@ -231,7 +232,7 @@ export function Login() {
                   )}
                 </motion.button>
 
-                <div className="mt-3 rounded-[1.75rem] bg-surface-container-low px-4 py-4 text-sm text-on-surface-variant">
+                <div className="mt-3 rounded-[1.75rem] border border-primary/10 bg-primary/5 px-4 py-4 text-sm text-on-surface-variant">
                   {isLogin ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
                   <button
                     onClick={() => {
