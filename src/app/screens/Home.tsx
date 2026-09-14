@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Coffee, Sparkles, Users, UtensilsCrossed } from "lucide-react";
 import { motion } from "motion/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "../navigation";
 import { BottomNav } from "../components/BottomNav";
 import { DesktopLayout } from "../components/DesktopLayout";
 import { GridSkeleton } from "../components/Skeleton";
@@ -81,22 +81,22 @@ function matchesPreferences(place: AppPlace, preferences: DiscoveryPreferences |
 function getHeroCopy(preferences: DiscoveryPreferences | null) {
   if (!preferences || preferences.moods.length === 0) {
     return {
-      eyebrow: "Curated Discovery",
-      title: "Cari tempat yang layak dikunjungi lagi.",
-      subtitle: "Bukan cuma list tempat. Ini discovery board buat mutusin mau makan, ngopi, atau nongkrong di Tegal dengan cepat.",
+      eyebrow: "Pilihan terkurasi",
+      title: "Bingung mau ke mana malam ini. Ini jawabannya.",
+      subtitle: "Pilih mood makan, ngopi, atau nongkrong. Tegal Eats yang nyaring tempatnya berdasarkan budget dan jam buka.",
     };
   }
 
   const moodMap: Record<DiscoveryMood, string> = {
-    makan: "kuliner serius",
-    coffee: "coffee run",
-    nongkrong: "tempat ngobrol lama",
+    makan: "makan",
+    coffee: "ngopi",
+    nongkrong: "nongkrong",
   };
 
   return {
-    eyebrow: "Personal Discovery",
-    title: `Rekomendasi untuk ${preferences.moods.map((mood) => moodMap[mood]).join(", ")}.`,
-    subtitle: "Preferensi kamu dipakai untuk ngasih shortlist yang lebih masuk akal, bukan sekadar ranking umum.",
+    eyebrow: "Buat selera kamu",
+    title: `Shortlist buat yang lagi pengin ${preferences.moods.map((mood) => moodMap[mood]).join(", ")}.`,
+    subtitle: "Ini hasil saringan selera kamu, bukan ranking umum.",
   };
 }
 
@@ -432,8 +432,8 @@ export function Home() {
   return (
     <DesktopLayout>
       <div className="min-h-screen bg-background text-on-surface font-body pb-32">
-        <header className="pt-16 pb-10 px-8 lg:px-12 max-w-[1400px] mx-auto">
-          <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }}>
+        <header className="pt-8 md:pt-12 pb-10 px-4 md:px-6 lg:px-8 fb-container">
+          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }} className="clay-card rounded-[32px] bg-surface-bright p-6 md:p-10">
             <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">
               {hero.eyebrow}
             </span>
@@ -445,15 +445,19 @@ export function Home() {
                 <p className="max-w-2xl text-on-surface-variant text-base md:text-lg leading-relaxed">{hero.subtitle}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/10">
-                  <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-primary mb-2">Discovery</p>
-                  <p className="text-3xl font-headline font-black">{places.length}</p>
+                <div className="bg-white rounded-2xl p-5 border-2 border-[#c9e2f0] shadow-clay-sm">
+                  <span className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center mb-3">
+                    <span className="material-symbols-outlined text-primary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>explore</span>
+                  </span>
+                  <p className="text-3xl font-headline font-black text-on-surface">{places.length}</p>
                   <p className="text-sm text-on-surface-variant mt-1">Tempat siap dijelajahi</p>
                 </div>
-                <div className="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/10">
-                  <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-primary mb-2">Planner</p>
-                  <p className="text-lg font-headline font-black leading-tight">{planCountLabel}</p>
-                  <button onClick={() => setShowOnboarding(true)} className="text-sm text-primary font-semibold mt-2">
+                <div className="bg-white rounded-2xl p-5 border-2 border-[#c9e2f0] shadow-clay-sm">
+                  <span className="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center mb-3">
+                    <span className="material-symbols-outlined text-secondary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>event_note</span>
+                  </span>
+                  <p className="text-lg font-headline font-black leading-tight text-on-surface">{planCountLabel}</p>
+                  <button onClick={() => setShowOnboarding(true)} className="text-sm text-primary font-semibold mt-2 min-h-[44px]">
                     Atur selera lagi
                   </button>
                 </div>
@@ -461,12 +465,12 @@ export function Home() {
             </div>
 
             <div ref={searchContainerRef} className="relative max-w-2xl group mt-8">
-              <div className="absolute inset-0 bg-primary/5 rounded-2xl blur-2xl group-hover:bg-primary/10 transition-all duration-500" />
-              <div className="relative flex items-center bg-surface-bright/70 backdrop-blur-2xl px-6 py-5 rounded-2xl border border-outline-variant/10">
-                <span className="material-symbols-outlined text-primary mr-4 text-2xl">search</span>
+              <div className="relative flex items-center bg-surface-container-low min-h-[48px] px-5 rounded-2xl shadow-clay-pressed">
+                <span className="material-symbols-outlined text-primary mr-4 text-[22px]">search</span>
                 <input
                   type="text"
-                  placeholder="Cari berdasarkan nama, area, atau vibe tempat..."
+                  aria-label="Cari makanan atau minuman"
+                  placeholder="Cari makanan atau minuman..."
                   value={search}
                   onFocus={() => {
                     setShowSearchSuggestions(true);
@@ -578,12 +582,12 @@ export function Home() {
           </motion.div>
         </header>
 
-        <section className="px-8 lg:px-12 max-w-[1400px] mx-auto mb-12">
-          <div className="flex gap-4 overflow-x-auto pb-2 mb-4">
+        <section className="px-4 md:px-6 lg:px-8 fb-container mb-12">
+          <div className="flex gap-3 overflow-x-auto pb-2 mb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <button
               onClick={() => setActiveFilter(null)}
-              className={`shrink-0 px-6 py-3 rounded-full font-headline font-black uppercase text-[10px] tracking-widest ${
-                !activeFilter ? "bg-primary text-on-primary" : "bg-surface-container-high text-on-surface-variant"
+              className={`shrink-0 min-h-[44px] px-6 rounded-full font-headline font-semibold text-xs tracking-wide transition-all duration-200 ${
+                !activeFilter ? "bg-primary text-on-primary shadow-clay-button" : "bg-surface-bright text-on-surface-variant shadow-clay-sm"
               }`}
             >
               Semua
@@ -592,8 +596,8 @@ export function Home() {
               <button
                 key={chip.label}
                 onClick={() => setActiveFilter((prev) => (prev === chip.label ? null : chip.label))}
-                className={`shrink-0 px-6 py-3 rounded-full font-headline font-black uppercase text-[10px] tracking-widest ${
-                  activeFilter === chip.label ? "bg-primary text-on-primary" : "bg-surface-container-high text-on-surface-variant"
+                className={`shrink-0 min-h-[44px] px-6 rounded-full font-headline font-semibold text-xs tracking-wide transition-all duration-200 ${
+                  activeFilter === chip.label ? "bg-primary text-on-primary shadow-clay-button" : "bg-surface-bright text-on-surface-variant shadow-clay-sm"
                 }`}
               >
                 {chip.label}
@@ -632,19 +636,19 @@ export function Home() {
           </div>
         </section>
 
-        <main className="px-8 lg:px-12 max-w-[1400px] mx-auto space-y-16">
+        <main className="px-5 md:px-8 lg:px-12 fb-container space-y-16">
           {recentPlans.length > 0 && (
             <section className="bg-surface-container-lowest rounded-[2rem] border border-outline-variant/10 p-6 md:p-8">
               <div className="flex items-center justify-between gap-4 mb-6">
                 <div>
-                  <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-2">Continue Planning</p>
-                  <h2 className="text-2xl md:text-3xl font-headline font-black">Rencana yang belum selesai</h2>
+                  <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-2">Lanjut jalan</p>
+                  <h2 className="text-2xl md:text-3xl font-headline font-black">Plan yang belum dieksekusi</h2>
                 </div>
                 <button onClick={() => navigate("/favorit")} className="text-sm font-semibold text-primary">
                   Buka planner
                 </button>
               </div>
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="clay-grid grid md:grid-cols-3 gap-4">
                 {recentPlans.map((plan) => (
                   <button key={plan.placeId} onClick={() => navigate(`/detail/${plan.placeId}`)} className="text-left bg-surface-container-low rounded-2xl p-5 border border-outline-variant/10">
                     <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-primary mb-2">
@@ -663,6 +667,7 @@ export function Home() {
               <div>
                 <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Shortlist</p>
                 <h2 className="text-3xl md:text-5xl font-headline font-extrabold tracking-tight">Kandidat terbaik minggu ini.</h2>
+                <p className="text-on-surface-variant mt-3 max-w-xl">Sudah disaring dari rating, jam buka, dan review terbaru.</p>
               </div>
               {allPersonalizedPicks.length > ITEMS_PER_PAGE && (
                 <p className="text-sm text-on-surface-variant font-medium">Halaman {currentPage} dari {totalPages}</p>
@@ -674,14 +679,14 @@ export function Home() {
             ) : personalizedPicks.length === 0 ? (
               <div className="py-20 text-center bg-surface-container-low rounded-[3rem] border border-dashed border-outline-variant/20">
                 <span className="material-symbols-outlined text-6xl text-on-surface-variant opacity-20 mb-4">search_off</span>
-                <h3 className="text-2xl font-headline font-bold text-on-surface">Tidak ada hasil</h3>
-                <p className="text-on-surface-variant mt-2 max-w-sm mx-auto">Coba ganti filter atau kata kunci pencarian kamu.</p>
+                <h3 className="text-2xl font-headline font-bold text-on-surface">Belum ketemu yang cocok</h3>
+                <p className="text-on-surface-variant mt-2 max-w-sm mx-auto">Coba ganti kata kunci atau longgarkan filternya.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {personalizedPicks.map((place, index) => (
-                  <motion.button key={place.id} initial={{ y: 30, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.7, delay: index * 0.08 }} onClick={() => navigate(`/detail/${place.id}`)} className="group text-left">
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-surface-container mb-5">
+                  <motion.button key={place.id} initial={{ y: 12, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.24, delay: Math.min(index * 0.04, 0.16), ease: [0.22, 1, 0.36, 1] }} whileHover={{ y: -4 }} onClick={() => navigate(`/detail/${place.id}`)} className="group text-left clay-card bg-surface-bright p-3 md:p-4 transition-[box-shadow,transform] active:scale-[0.97] active:shadow-clay-pressed">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-surface-container mb-5 border-2 border-[#dce3f8] shadow-clay-pressed">
                       {place.imageUrl ? (
                         <img src={place.imageUrl} alt={place.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                       ) : (
@@ -698,17 +703,21 @@ export function Home() {
                       </div>
                     </div>
 
-                    <h3 className="text-2xl font-headline font-extrabold group-hover:text-primary transition-colors">{place.name}</h3>
-                    <div className="flex items-center gap-3 mt-2 text-on-surface-variant text-sm">
-                      <span>{place.category || "Venue"}</span>
-                      <span className="w-1 h-1 rounded-full bg-outline-variant/40" />
-                      <span>{place.distanceKm ? `${place.distanceKm.toFixed(1)} km` : inferBudgetTier(place.priceLabel)}</span>
-                      <span className="w-1 h-1 rounded-full bg-outline-variant/40" />
-                      <span className={isPlaceOpenNow(place.hours) ? "text-primary font-bold" : "text-on-surface-variant"}>
+                    <h3 className="text-xl font-headline font-bold group-hover:text-primary transition-colors">{place.name}</h3>
+                    <div className="flex items-center gap-2 mt-2 text-on-surface-variant text-sm">
+                      <span className="px-2.5 py-1 rounded-full bg-primary-container/60 text-primary text-[11px] font-semibold">{place.category || "Venue"}</span>
+                      <span aria-hidden="true">•</span>
+                      <span>★ {place.rating || "4.5"}</span>
+                      <span aria-hidden="true">•</span>
+                      <span className={isPlaceOpenNow(place.hours) ? "text-tertiary font-semibold" : "text-on-surface-variant"}>
                         {isPlaceOpenNow(place.hours) ? "Buka" : "Tutup"}
                       </span>
                     </div>
-                    <p className="text-sm text-on-surface-variant leading-relaxed mt-3 line-clamp-2">{place.description || place.address || "Belum ada ringkasan tempat. Buka detail untuk lihat info lengkap."}</p>
+                    <p className="menu-description text-sm text-on-surface-variant leading-relaxed mt-2">{place.description || place.address || "Belum ada ringkasan tempat. Buka detail untuk lihat info lengkap."}</p>
+                    <div className="mt-4 flex items-center justify-between gap-3">
+                      <span className="price-strong text-on-surface">{place.priceLabel || (place.distanceKm ? `${place.distanceKm.toFixed(1)} km` : inferBudgetTier(place.priceLabel))}</span>
+                      <span className="min-h-[44px] inline-flex items-center px-5 rounded-full bg-primary text-on-primary text-sm font-semibold shadow-clay-button">Lihat</span>
+                    </div>
                   </motion.button>
                 ))}
               </div>

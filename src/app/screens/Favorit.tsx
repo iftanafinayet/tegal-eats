@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "../navigation";
 import { BottomNav } from "../components/BottomNav";
 import { DesktopLayout } from "../components/DesktopLayout";
 import { loadVisitPlans, saveVisitPlan, getVisitPlanSummary } from "../api/engagement";
@@ -101,37 +101,41 @@ export function Favorit() {
   return (
     <DesktopLayout>
       <div className="min-h-screen bg-background text-on-surface font-body pb-32">
-        <header className="bg-surface-bright pt-16 pb-18 px-8 relative overflow-hidden">
-          <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[120%] bg-primary/5 rounded-full blur-[100px] rotate-12" />
-          <div className="max-w-5xl mx-auto relative z-10">
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }}>
-              <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block">Trip Planner</span>
-              <h1 className="text-5xl md:text-7xl font-headline font-extrabold text-on-surface tracking-tighter leading-[0.9] mb-5">
-                Saved places yang sekarang
-                <br />
-                <span className="text-primary italic">punya status.</span>
-              </h1>
-            </motion.div>
-            <p className="text-on-surface-variant max-w-2xl text-lg leading-relaxed">Favorit tidak berhenti di tombol save. Dari sini kamu bisa bedakan mana yang baru masuk wishlist, mana yang harus dicoba minggu ini, dan mana yang sudah terbukti layak revisit.</p>
-          </div>
+        <header className="pt-8 md:pt-12 pb-10 px-4 md:px-6 lg:px-8 fb-container">
+          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }} className="clay-card rounded-[32px] bg-surface-bright p-6 md:p-10">
+            <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Trip Planner</span>
+            <h1 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface tracking-tight leading-[1.05] mb-4 max-w-3xl">
+              Tempat yang kamu simpan, sekarang ada statusnya.
+            </h1>
+            <p className="text-on-surface-variant max-w-2xl text-base md:text-lg leading-relaxed">Bedakan wishlist, plan minggu ini, dan tempat yang sudah terbukti enak buat revisit.</p>
+          </motion.div>
         </header>
 
-        <main className="mt-10 px-8 max-w-[1400px] mx-auto -mt-8 relative z-20 space-y-10">
+        <main className="px-4 md:px-6 lg:px-8 fb-container relative z-20 space-y-10">
           <section className="grid md:grid-cols-3 gap-4">
-            <div className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10">
-              <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-primary mb-2">Wishlist</p>
-              <p className="text-4xl font-headline font-black">{planCounts.wishlist}</p>
-              <p className="text-sm text-on-surface-variant mt-1">Tempat yang belum dijadwalkan.</p>
+            <div className="bg-white rounded-2xl p-5 border-2 border-[#c9e2f0] shadow-clay-sm">
+              <span className="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-primary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>bookmark</span>
+              </span>
+              <p className="text-4xl font-headline font-black text-on-surface">{planCounts.wishlist}</p>
+              <p className="text-sm font-semibold text-on-surface mt-1">Wishlist</p>
+              <p className="text-sm text-on-surface-variant">Tempat yang belum dijadwalkan.</p>
             </div>
-            <div className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10">
-              <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-primary mb-2">This Week</p>
-              <p className="text-4xl font-headline font-black">{planCounts.this_week}</p>
-              <p className="text-sm text-on-surface-variant mt-1">Kandidat yang harus cepat diputuskan.</p>
+            <div className="bg-white rounded-2xl p-5 border-2 border-[#c9e2f0] shadow-clay-sm">
+              <span className="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-secondary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>event_note</span>
+              </span>
+              <p className="text-4xl font-headline font-black text-on-surface">{planCounts.this_week}</p>
+              <p className="text-sm font-semibold text-on-surface mt-1">This Week</p>
+              <p className="text-sm text-on-surface-variant">Kandidat yang harus cepat diputuskan.</p>
             </div>
-            <div className="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/10">
-              <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-primary mb-2">Visited</p>
-              <p className="text-4xl font-headline font-black">{planCounts.visited}</p>
-              <p className="text-sm text-on-surface-variant mt-1">Tempat yang sudah pernah dicoba.</p>
+            <div className="bg-white rounded-2xl p-5 border-2 border-[#c9e2f0] shadow-clay-sm">
+              <span className="w-10 h-10 rounded-xl bg-tertiary-container flex items-center justify-center mb-3">
+                <span className="material-symbols-outlined text-tertiary text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+              </span>
+              <p className="text-4xl font-headline font-black text-on-surface">{planCounts.visited}</p>
+              <p className="text-sm font-semibold text-on-surface mt-1">Visited</p>
+              <p className="text-sm text-on-surface-variant">Tempat yang sudah pernah dicoba.</p>
             </div>
           </section>
 
@@ -139,16 +143,16 @@ export function Favorit() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">{[1, 2, 3, 4].map((item) => <div key={item} className="bg-surface-container-low h-64 animate-pulse rounded-[2rem]" />)}</div>
           ) : favorites.length === 0 ? (
             <div className="bg-surface-container-lowest p-16 text-center rounded-[2rem] border border-outline-variant/5">
-              <h3 className="text-2xl font-headline font-bold text-on-surface mb-3">{!user ? "Masuk dulu untuk pakai planner" : "Belum ada tempat yang kamu simpan"}</h3>
-              <p className="max-w-xl mx-auto text-on-surface-variant mb-8 leading-relaxed">{!user ? "Login supaya wishlist, planning, dan tempat yang sudah kamu coba bisa tersimpan di satu tempat." : "Mulai dari home atau detail tempat, lalu simpan spot yang menarik untuk kamu putuskan nanti."}</p>
-              <button onClick={() => navigate(!user ? "/login" : "/home")} className="bg-primary text-on-primary px-8 py-4 rounded-2xl font-headline font-bold">{!user ? "Masuk" : "Cari tempat"}</button>
+              <h3 className="text-2xl font-headline font-bold text-on-surface mb-3">{!user ? "Masuk dulu biar plan kamu kesimpen" : "Belum ada tempat yang kamu simpan"}</h3>
+              <p className="max-w-xl mx-auto text-on-surface-variant mb-8 leading-relaxed">{!user ? "Masuk biar wishlist dan plan jalan kamu kesimpen." : "Mulai dari home, simpan spot yang menarik, lalu putuskan nanti."}</p>
+              <button onClick={() => navigate(!user ? "/login" : "/home")} className="bg-primary text-on-primary px-8 py-4 rounded-2xl font-headline font-bold">{!user ? "Masuk untuk simpan plan" : "Cari tempat"}</button>
             </div>
           ) : (
             <div className="space-y-10">
               {([
-                { key: "wishlist", title: "Wishlist", subtitle: "Masih tahap simpan dulu." },
-                { key: "this_week", title: "Minggu Ini", subtitle: "Shortlist yang harus diputuskan segera." },
-                { key: "visited", title: "Sudah Dicoba", subtitle: "Tempat yang layak diingat untuk revisit." },
+                { key: "wishlist", title: "Wishlist", subtitle: "Baru disimpan, belum terjadwal." },
+                { key: "this_week", title: "Minggu Ini", subtitle: "Harus diputuskan cepat." },
+                { key: "visited", title: "Sudah Dicoba", subtitle: "Layak diingat buat balik lagi." },
               ] as const).map((section) => (
                 <section key={section.key}>
                   <div className="flex items-end justify-between gap-4 mb-5">
@@ -164,7 +168,7 @@ export function Favorit() {
                   ) : (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                       {groupedFavorites[section.key].map((place, index) => (
-                        <motion.div key={place.id} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: index * 0.05 }} className="bg-surface-container-lowest rounded-[2rem] border border-outline-variant/10 overflow-hidden">
+                        <motion.div key={place.id} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: index * 0.05 }} className="clay-card bg-surface-container-lowest rounded-3xl overflow-hidden">
                           <button className="w-full text-left" onClick={() => navigate(`/detail/${place.id}`)}>
                             <div className="h-56 bg-surface-container overflow-hidden">
                               {place.imageUrl ? (

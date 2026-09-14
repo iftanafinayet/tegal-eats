@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "../navigation";
 import { AppPlace, AppReview, isPlaceOpenNow } from "../api/contracts";
 import { ReviewSkeleton, Skeleton } from "../components/Skeleton";
 import {
@@ -239,33 +239,34 @@ export function Detail() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface font-body overflow-x-hidden">
-      <div className="relative min-h-[60vh] w-full overflow-hidden">
+      <div className="clay-card relative min-h-[60vh] mx-4 mt-4 overflow-hidden rounded-[32px] lg:mx-auto lg:max-w-[1200px]">
         {place.imageUrl ? (
-          <motion.img initial={{ scale: 1.05 }} animate={{ scale: 1 }} transition={{ duration: 1.1, ease: "easeOut" }} src={place.imageUrl} alt={place.name} className="w-full h-[60vh] md:h-[72vh] object-cover" />
+          <motion.img initial={{ scale: 1.05 }} animate={{ scale: 1 }} transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }} src={place.imageUrl} alt={place.name} className="w-full h-[60vh] md:h-[72vh] object-cover" />
         ) : (
           <div className="w-full h-[60vh] md:h-[72vh] bg-surface-container flex items-center justify-center">
             <span className="material-symbols-outlined text-9xl text-on-surface-variant opacity-10">restaurant</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
 
-        <div className="absolute top-10 left-0 right-0 px-6 flex justify-between items-center z-30">
-          <button onClick={() => navigate(-1)} className="bg-surface-bright/85 backdrop-blur-md p-3 rounded-full text-on-surface border border-white/20">
+        <div className="absolute top-6 left-0 right-0 px-6 flex justify-between items-center z-30">
+          <button onClick={() => navigate(-1)} aria-label="Kembali" className="min-w-[44px] min-h-[44px] bg-white/90 backdrop-blur-md p-3 rounded-full text-on-surface border border-white/70 shadow-clay-sm">
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
 
           <div className="flex gap-3">
-            <button onClick={handleShare} className="bg-surface-bright/85 backdrop-blur-md p-3 rounded-full text-on-surface border border-white/20">
+            <button onClick={handleShare} aria-label="Bagikan" className="min-w-[44px] min-h-[44px] bg-white/90 backdrop-blur-md p-3 rounded-full text-on-surface border border-white/70 shadow-clay-sm">
               <span className="material-symbols-outlined">share</span>
             </button>
-            <button onClick={toggleFavorite} className={`bg-surface-bright/85 backdrop-blur-md p-3 rounded-full border border-white/20 ${isFavorite ? "text-primary" : "text-on-surface"}`}>
+            <button onClick={toggleFavorite} aria-label="Favorit" className={`min-w-[44px] min-h-[44px] bg-white/90 backdrop-blur-md p-3 rounded-full border border-white/70 shadow-clay-sm ${isFavorite ? "text-accent-coral" : "text-on-surface"}`}>
               <span className="material-symbols-outlined" style={{ fontVariationSettings: isFavorite ? "'FILL' 1" : "" }}>favorite</span>
             </button>
           </div>
         </div>
 
-        <div className="absolute bottom-12 left-0 right-0 px-8 z-20">
-          <div className="max-w-6xl mx-auto">
+        <div className="absolute bottom-8 left-0 right-0 px-5 md:px-8 z-20">
+          <div className="fb-container">
+            <div className="inline-block max-w-3xl rounded-2xl bg-white px-5 py-4 border border-white shadow-clay">
             {loading ? (
               <div className="space-y-4">
                 <Skeleton variant="text" className="h-6 w-32" />
@@ -277,141 +278,156 @@ export function Detail() {
               </div>
             ) : (
               <>
-                <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block">Decision Page</span>
-                <h1 className="text-4xl md:text-7xl font-headline font-extrabold text-on-surface tracking-tighter leading-[0.92] mb-4 max-w-4xl">{place.name}</h1>
-                <div className="flex flex-wrap items-center gap-4 md:gap-6">
+                <p className="font-headline font-semibold text-primary text-xs mb-2 block">Cek sebelum berangkat</p>
+                <h1 className="text-[32px] md:text-[44px] font-headline font-bold text-on-surface leading-[1.2] mb-3 max-w-3xl">{place.name}</h1>
+                <div className="flex flex-wrap items-center gap-3 md:gap-4">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="text-xl font-bold">{place.rating || "4.5"}</span>
+                    <span className="material-symbols-outlined text-accent-mango" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="price-strong text-lg">{place.rating || "4.5"}</span>
                     <span className="text-on-surface-variant text-sm font-medium">({place.reviewCount} review)</span>
                   </div>
-                  <span className="text-on-surface font-headline font-bold uppercase tracking-widest text-xs px-3 py-1 bg-primary/10 rounded-full">{place.category || "Venue"}</span>
+                  <span className="text-primary font-headline font-semibold text-xs px-3 py-1.5 bg-primary-container rounded-full">{place.category || "Venue"}</span>
                   <span className="text-on-surface-variant text-sm">{place.distanceKm ? `${place.distanceKm.toFixed(1)} km` : "-"}</span>
                 </div>
               </>
             )}
+            </div>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-8 py-14 grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-5 space-y-8">
-          <section className="bg-surface-container-lowest rounded-[2rem] p-6 md:p-8 border border-outline-variant/10">
+      <main className="fb-container px-4 md:px-6 lg:px-8 py-10 space-y-6 pb-32 md:pb-16">
+        {/* Z row 1: fakta keputusan full-width */}
+        <section className="clay-card bg-surface-container-lowest rounded-3xl p-6 md:p-8">
+          <div className="clay-grid grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {decisionCards.map((card) => (
+              <div key={card.label} className="rounded-2xl p-4">
+                <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] opacity-70 mb-2">{card.label}</p>
+                <p className="font-semibold leading-snug line-clamp-2">{card.value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Z row 2: ringkasan + aksi sejajar, sama tinggi */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          <section className="clay-card lg:col-span-7 bg-surface-container-lowest rounded-3xl p-6 md:p-8">
             <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Ringkasan</p>
-            <h2 className="text-2xl font-headline font-black mb-4">Apa yang perlu kamu tahu dulu</h2>
+            <h2 className="text-2xl font-headline font-black mb-4">Yang perlu kamu tahu dulu</h2>
             <p className="text-on-surface-variant leading-relaxed">{place.description}</p>
-            <div className="grid grid-cols-2 gap-3 mt-6">
-              {decisionCards.map((card) => (
-                <div key={card.label} className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10">
-                  <p className="text-[10px] font-headline font-black uppercase tracking-[0.2em] text-on-surface-variant mb-2">{card.label}</p>
-                  <p className="font-semibold leading-snug">{card.value}</p>
-                </div>
-              ))}
-            </div>
           </section>
 
-          <section className="bg-surface-container-lowest rounded-[2rem] p-6 md:p-8 border border-outline-variant/10">
-            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Plan This</p>
-            <h2 className="text-2xl font-headline font-black mb-5">Bikin tempat ini punya next action</h2>
+          <section className="clay-card clay-sky lg:col-span-5 rounded-3xl p-6 md:p-8 flex flex-col justify-center">
+            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Action</p>
+            <h2 className="text-2xl font-headline font-black mb-5">Lanjut dari sini</h2>
             <div className="grid gap-3">
-              {([
-                ["wishlist", "Masuk wishlist", "Simpan dulu untuk nanti."],
-                ["this_week", "Masuk plan minggu ini", "Tandai sebagai kandidat terdekat."],
-                ["visited", "Sudah pernah coba", "Biar gampang cari tempat yang layak revisit."],
-              ] as const).map(([status, title, subtitle]) => (
-                <button key={status} onClick={() => handleSetVisitPlan(status)} className={`text-left rounded-2xl p-4 border ${visitPlanStatus === status ? "border-primary bg-primary/5" : "border-outline-variant/10 bg-surface-container-low"}`}>
-                  <p className="font-headline font-black">{title}</p>
-                  <p className="text-sm text-on-surface-variant mt-1">{subtitle}</p>
+              <button onClick={() => window.open(buildMapsUrl(place), "_blank", "noopener,noreferrer")} className="w-full min-h-[52px] bg-primary text-on-primary py-4 rounded-2xl font-headline font-black">Buka rute di Google Maps</button>
+              <button onClick={() => navigate(`/review/${id}`)} className="w-full min-h-[52px] bg-surface-bright text-on-surface py-4 rounded-2xl font-headline font-black shadow-clay-sm">Tulis review kamu</button>
+            </div>
+          </section>
+        </div>
+
+        {/* Z row 3: plan horizontal full-width */}
+        <section className="clay-card bg-surface-container-lowest rounded-3xl p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-5">
+            <div>
+              <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Plan This</p>
+              <h2 className="text-2xl font-headline font-black">Mau diapain tempat ini</h2>
+            </div>
+            {visitPlanStatus && (
+              <p className="text-sm text-on-surface-variant">Status sekarang: <span className="font-bold text-primary">{visitPlanStatus === "wishlist" ? "Wishlist" : visitPlanStatus === "this_week" ? "Minggu ini" : "Sudah coba"}</span></p>
+            )}
+          </div>
+          <div className="grid md:grid-cols-3 gap-3">
+            {([
+              ["wishlist", "Masuk wishlist", "Simpan dulu, pikir nanti."],
+              ["this_week", "Masuk plan minggu ini", "Masuk shortlist jalan."],
+              ["visited", "Sudah pernah coba", "Tandai biar gampang revisit."],
+            ] as const).map(([status, title, subtitle]) => (
+              <button key={status} onClick={() => handleSetVisitPlan(status)} className={`text-left rounded-2xl p-4 border-2 min-h-[88px] transition-all duration-200 ${visitPlanStatus === status ? "border-primary bg-primary-container/40 shadow-clay-pressed" : "border-transparent bg-surface-container-low shadow-clay-sm"}`}>
+                <p className="font-headline font-black">{title}</p>
+                <p className="text-sm text-on-surface-variant mt-1">{subtitle}</p>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Z row 4: trust + review grid full-width */}
+        <section className="clay-card bg-surface-container-lowest rounded-3xl p-6 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+            <div>
+              <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Trust Layer</p>
+              <h2 className="text-2xl md:text-3xl font-headline font-black">Review-nya bisa dipercaya atau tidak</h2>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {(["terbaru", "terbantu", "foto"] as const).map((tab) => (
+                <button key={tab} onClick={() => setActiveTab(tab)} className={`min-h-[44px] px-4 rounded-full text-xs font-headline font-black uppercase tracking-[0.15em] transition-all duration-200 ${activeTab === tab ? "bg-primary text-on-primary shadow-clay-button" : "bg-surface-container-low text-on-surface-variant shadow-clay-sm"}`}>
+                  {tab === "terbaru" ? "Terbaru" : tab === "terbantu" ? "Terbantu" : "Ada Foto"}
                 </button>
               ))}
             </div>
-          </section>
+          </div>
 
-          <section className="bg-surface-container-lowest rounded-[2rem] p-6 md:p-8 border border-outline-variant/10">
-            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Action</p>
-            <div className="grid gap-3">
-              <button onClick={() => window.open(buildMapsUrl(place), "_blank", "noopener,noreferrer")} className="w-full bg-primary text-on-primary py-4 rounded-2xl font-headline font-black">Buka rute di Google Maps</button>
-              <button onClick={() => navigate(`/review/${id}`)} className="w-full bg-surface-container-high text-on-surface py-4 rounded-2xl font-headline font-black">Tulis review kamu</button>
-            </div>
-          </section>
-        </div>
-
-        <div className="lg:col-span-7 space-y-8">
-          <section className="bg-surface-container-lowest rounded-[2rem] p-6 md:p-8 border border-outline-variant/10">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-              <div>
-                <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Trust Layer</p>
-                <h2 className="text-2xl md:text-3xl font-headline font-black">Apakah review di sini cukup meyakinkan?</h2>
+          <div className="clay-grid grid md:grid-cols-3 gap-3 mb-8">
+            {trustSignals.map((signal) => (
+              <div key={signal} className="rounded-2xl p-4">
+                <p className="font-semibold text-sm leading-relaxed">{signal}</p>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                {(["terbaru", "terbantu", "foto"] as const).map((tab) => (
-                  <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 rounded-full text-xs font-headline font-black uppercase tracking-[0.15em] ${activeTab === tab ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface-variant"}`}>
-                    {tab === "terbaru" ? "Terbaru" : tab === "terbantu" ? "Terbantu" : "Ada Foto"}
-                  </button>
-                ))}
-              </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="grid md:grid-cols-3 gap-3 mb-8">
-              {trustSignals.map((signal) => (
-                <div key={signal} className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10">
-                  <p className="font-semibold text-sm leading-relaxed">{signal}</p>
-                </div>
-              ))}
+          {loading ? (
+            <ReviewSkeleton />
+          ) : visibleReviews.length === 0 ? (
+            <div className="bg-surface-container-low p-10 text-center rounded-3xl border-2 border-dashed border-outline-variant/30">
+              <p className="font-headline font-black text-xl mb-2">Belum ada review yang cocok dengan filter ini</p>
+              <p className="text-on-surface-variant mb-6">Coba ganti filter, atau jadi orang pertama yang kasih konteks buat tempat ini.</p>
+              <button onClick={() => navigate(`/review/${id}`)} className="bg-primary text-on-primary px-8 py-4 rounded-2xl font-headline font-black">Tulis review pertama</button>
             </div>
-
-            <div className="space-y-6">
-              {loading ? (
-                <ReviewSkeleton />
-              ) : visibleReviews.length === 0 ? (
-                <div className="bg-surface-container-low p-10 text-center rounded-[2rem] border border-dashed border-outline-variant/30">
-                  <p className="font-headline font-black text-xl mb-2">Belum ada review yang cocok dengan filter ini</p>
-                  <p className="text-on-surface-variant">Coba ganti filter, atau jadi orang pertama yang kasih konteks buat tempat ini.</p>
-                </div>
-              ) : (
-                visibleReviews.map((review) => (
-                  <motion.article key={review.id} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-surface-container-low rounded-[2rem] p-5 md:p-6 border border-outline-variant/10">
-                    <header className="flex items-start justify-between gap-4 mb-4">
-                      <div className="flex items-center gap-4 min-w-0">
-                        <img src={review.avatarUrl} className="w-12 h-12 rounded-full object-cover" alt="avatar" />
-                        <div className="min-w-0">
-                          <p className="font-headline font-black text-lg truncate">@{review.userName}</p>
-                          <div className="flex gap-0.5 mt-1">
-                            {[...Array(5)].map((_, index) => (
-                              <span key={index} className={`material-symbols-outlined text-[14px] ${index < review.rating ? "text-secondary" : "text-on-surface-variant/20"}`} style={{ fontVariationSettings: index < review.rating ? "'FILL' 1" : "" }}>star</span>
-                            ))}
-                          </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              {visibleReviews.map((review) => (
+                <motion.article key={review.id} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="clay-card bg-surface-container-low rounded-3xl p-5 md:p-6">
+                  <header className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <img src={review.avatarUrl} className="w-12 h-12 rounded-full object-cover" alt="avatar" />
+                      <div className="min-w-0">
+                        <p className="font-headline font-black text-lg truncate">@{review.userName}</p>
+                        <div className="flex gap-0.5 mt-1">
+                          {[...Array(5)].map((_, index) => (
+                            <span key={index} className={`material-symbols-outlined text-[14px] ${index < review.rating ? "text-secondary" : "text-on-surface-variant/20"}`} style={{ fontVariationSettings: index < review.rating ? "'FILL' 1" : "" }}>star</span>
+                          ))}
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-[10px] font-headline font-black uppercase tracking-[0.18em] text-primary">{review.trustLabel}</p>
-                        <p className="text-xs text-on-surface-variant mt-1">{review.createdAt ? new Date(review.createdAt).toLocaleDateString("id-ID") : ""}</p>
-                      </div>
-                    </header>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[10px] font-headline font-black uppercase tracking-[0.18em] text-primary">{review.trustLabel}</p>
+                      <p className="text-xs text-on-surface-variant mt-1">{review.createdAt ? new Date(review.createdAt).toLocaleDateString("id-ID") : ""}</p>
+                    </div>
+                  </header>
 
-                    <p className="text-on-surface leading-relaxed mb-4">{review.comment || "User tidak menulis komentar tambahan."}</p>
+                  <p className="text-on-surface leading-relaxed mb-4 line-clamp-4">{review.comment || "User tidak menulis komentar tambahan."}</p>
 
-                    {review.imageUrls[0] && (
-                      <div className="mb-4 rounded-[1.5rem] overflow-hidden h-64">
-                        <img src={review.imageUrls[0]} className="w-full h-full object-cover" alt="review context" />
-                      </div>
-                    )}
+                  {review.imageUrls[0] && (
+                    <div className="mb-4 rounded-2xl overflow-hidden h-56">
+                      <img src={review.imageUrls[0]} className="w-full h-full object-cover" alt="review context" />
+                    </div>
+                  )}
 
-                    <footer className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-2 rounded-full bg-surface-bright text-xs font-headline font-black uppercase tracking-[0.15em] text-on-surface-variant">{review.imageUrls.length ? "Ada foto" : "Tanpa foto"}</span>
-                        <span className="px-3 py-2 rounded-full bg-surface-bright text-xs font-headline font-black uppercase tracking-[0.15em] text-on-surface-variant">{review.rating >= 4 ? "Positif" : "Perlu dicermati"}</span>
-                      </div>
-                      <button onClick={() => handleAppreciate(review.id)} className={`px-4 py-2 rounded-full text-xs font-headline font-black uppercase tracking-[0.15em] ${likedReviewIds.has(review.id) ? "bg-primary text-on-primary" : "bg-surface-bright text-on-surface-variant"}`}>
-                        {review.likes + (likedReviewIds.has(review.id) ? 1 : 0)} apresiasi
-                      </button>
-                    </footer>
-                  </motion.article>
-                ))
-              )}
+                  <footer className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap gap-2">
+                      <span className="px-3 py-2 rounded-full bg-surface-bright text-xs font-headline font-black uppercase tracking-[0.15em] text-on-surface-variant">{review.imageUrls.length ? "Ada foto" : "Tanpa foto"}</span>
+                      <span className="px-3 py-2 rounded-full bg-surface-bright text-xs font-headline font-black uppercase tracking-[0.15em] text-on-surface-variant">{review.rating >= 4 ? "Positif" : "Perlu dicermati"}</span>
+                    </div>
+                    <button onClick={() => handleAppreciate(review.id)} className={`min-h-[44px] px-4 rounded-full text-xs font-headline font-black uppercase tracking-[0.15em] transition-all duration-200 ${likedReviewIds.has(review.id) ? "bg-primary text-on-primary shadow-clay-button" : "bg-surface-bright text-on-surface-variant shadow-clay-sm"}`}>
+                      {review.likes + (likedReviewIds.has(review.id) ? 1 : 0)} apresiasi
+                    </button>
+                  </footer>
+                </motion.article>
+              ))}
             </div>
-          </section>
-        </div>
+          )}
+        </section>
       </main>
 
       <div className="fixed bottom-0 left-0 right-0 p-6 z-50 md:hidden bg-gradient-to-t from-background to-transparent pb-10">

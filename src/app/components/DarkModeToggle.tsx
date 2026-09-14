@@ -17,11 +17,11 @@ export function DarkModeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center transition-all hover:scale-110"
+      className="w-11 h-11 rounded-2xl bg-surface-bright flex items-center justify-center text-on-surface shadow-clay-sm transition-colors hover:text-primary active:shadow-clay-pressed"
       aria-label="Toggle dark mode"
     >
       {theme === "dark" ? (
-        <Sun size={20} className="text-yellow-500" />
+        <Sun size={20} className="text-on-surface" />
       ) : (
         <Moon size={20} className="text-slate-700" />
       )}

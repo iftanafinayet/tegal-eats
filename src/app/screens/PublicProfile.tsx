@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "../navigation";
 import { BottomNav } from "../components/BottomNav";
 import { DesktopLayout } from "../components/DesktopLayout";
 import { AppReview } from "../api/contracts";
@@ -106,23 +106,23 @@ export function PublicProfile() {
   return (
     <DesktopLayout>
       <div className="min-h-screen bg-background text-on-surface font-body pb-32">
-        <header className="pt-20 pb-14 px-8 lg:px-12 max-w-[1400px] mx-auto relative overflow-hidden">
+        <header className="pt-20 pb-14 px-8 lg:px-12 fb-container relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 rounded-full blur-[120px] -rotate-12 translate-x-1/2" />
           <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }} className="relative z-10">
             <button onClick={() => navigate(-1)} className="mb-6 text-sm font-semibold text-primary">
               Kembali
             </button>
-            <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Public Profile</span>
+            <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Profil komunitas</span>
             <h1 className="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter leading-[0.9] max-w-4xl">
-              {loading ? "Memuat profil..." : profile ? profile.displayName : "Profil tidak ditemukan"}
+              {loading ? "Memuat profil..." : profile ? `${profile.displayName} — selera yang bisa kamu ikuti.` : "Profil tidak ditemukan"}
             </h1>
             <p className="text-on-surface-variant text-lg max-w-2xl mt-5">
-              {profile ? profile.bio : "Handle ini belum punya profil publik atau migration sosial belum dijalankan."}
+              {profile ? "Lihat pola review, tempat favorit, dan seberapa konsisten rekomendasinya." : "Profil ini belum ada atau belum punya review publik."}
             </p>
           </motion.div>
         </header>
 
-        <main className="px-8 lg:px-12 max-w-[1400px] mx-auto space-y-10">
+        <main className="px-8 lg:px-12 fb-container space-y-10">
           {profile ? (
             <>
               <section className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-8">
@@ -138,7 +138,7 @@ export function PublicProfile() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                  <div className="clay-grid grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                     <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{profile.reviewCount}</p><p className="text-xs text-on-surface-variant mt-1">Review</p></div>
                     <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{profile.averageRating ? profile.averageRating.toFixed(1) : "0.0"}</p><p className="text-xs text-on-surface-variant mt-1">Avg rating</p></div>
                     <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{profile.followerCount}</p><p className="text-xs text-on-surface-variant mt-1">Follower</p></div>
@@ -149,7 +149,7 @@ export function PublicProfile() {
                 <div className="bg-surface-container-lowest p-8 rounded-[2rem] border border-outline-variant/10">
                   <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Context</p>
                   <h2 className="text-3xl font-headline font-black mb-6">Bagaimana pola rekomendasinya kebaca</h2>
-                  <div className="grid gap-4">
+                  <div className="clay-grid grid gap-4">
                     <div className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10"><p className="text-xs uppercase tracking-[0.18em] text-on-surface-variant font-headline font-black mb-2">Kecenderungan</p><p className="font-semibold">{profile.averageRating >= 4.3 ? "Sering kasih sinyal positif ke tempat yang konsisten" : "Punya mix review positif dan kritis"}</p></div>
                     <div className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10"><p className="text-xs uppercase tracking-[0.18em] text-on-surface-variant font-headline font-black mb-2">Volume</p><p className="font-semibold">{profile.reviewCount >= 6 ? "Sudah cukup banyak untuk jadi bahan referensi" : "Masih tahap awal, tapi pola mulai terbentuk"}</p></div>
                     <div className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10"><p className="text-xs uppercase tracking-[0.18em] text-on-surface-variant font-headline font-black mb-2">Jaringan</p><p className="font-semibold">{profile.followerCount >= 3 ? "Sudah mulai punya audiens komunitas" : "Masih kecil, tapi bisa tumbuh seiring aktivitas"}</p></div>

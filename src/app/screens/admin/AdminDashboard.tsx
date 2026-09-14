@@ -9,8 +9,8 @@ import {
   deleteReview,
 } from "../../api/places";
 import { uploadImage } from "../../../utils/uploadImage";
-import { supabase } from "../../../supabaseClient";
-import { useNavigate } from "react-router-dom";
+import { authClient } from "../../../lib/auth-client";
+import { useNavigate } from "../../navigation";
 
 type AdminTab = "overview" | "places" | "reviews";
 
@@ -118,7 +118,7 @@ function EditModal({
       });
       onSave(saved);
       onClose();
-    } catch (e) {
+    } catch {
       alert("Gagal menyimpan perubahan.");
     } finally {
       setSaving(false);
@@ -276,7 +276,7 @@ function AdminOverview({ places, reviews }: { places: PlaceRecord[]; reviews: Re
                 <p className="text-white/40 text-xs truncate">{r.username || "anon"}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="material-symbols-outlined text-yellow-400 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                <span className="material-symbols-outlined text-white/60 text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                 <span className="text-white text-sm font-bold">{r.rating}</span>
               </div>
             </div>
@@ -308,7 +308,7 @@ function AdminPlaces({
     try {
       await deletePlace(deleteTarget.id);
       onUpdate({ ...deleteTarget, name: "___DELETED___" });
-    } catch (e) {
+    } catch {
       alert("Gagal menghapus tempat.");
     } finally {
       setDeleteTarget(null);
@@ -425,7 +425,7 @@ function AdminReviews({
     try {
       await deleteReview(String(deleteTarget.id));
       onDelete(String(deleteTarget.id));
-    } catch (e) {
+    } catch {
       alert("Gagal menghapus review.");
     } finally {
       setDeleteTarget(null);
@@ -464,7 +464,7 @@ function AdminReviews({
                 <td className="p-4 text-white/50">@{review.username || "anon"}</td>
                 <td className="p-4 text-white/50 hidden md:table-cell">
                   <span className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-yellow-400 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    <span className="material-symbols-outlined text-white/60 text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                     {review.rating}
                   </span>
                 </td>
@@ -529,9 +529,9 @@ export function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white flex">
+    <div className="admin-neo min-h-screen bg-[#202327] text-white flex">
       {/* Sidebar */}
-      <aside className="w-60 shrink-0 border-r border-white/10 flex flex-col p-6 sticky top-0 h-screen">
+      <aside className="w-60 shrink-0 border-r border-white/10 flex flex-col p-6 sticky top-0 h-screen shadow-[10px_0_24px_rgba(0,0,0,.22)]">
         <div className="mb-10">
           <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest mb-1">Tegal Eats</p>
           <h1 className="text-xl font-black">Admin Panel</h1>
@@ -542,7 +542,7 @@ export function AdminDashboard() {
               key={item.id}
               onClick={() => setTab(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-colors ${tab === item.id
-                ? "bg-white text-black"
+                ? "bg-[#30353a] text-[#f4f6f8] shadow-[inset_3px_3px_7px_rgba(0,0,0,.38),inset_-3px_-3px_7px_rgba(255,255,255,.05)]"
                 : "text-white/50 hover:text-white hover:bg-white/5"
                 }`}
             >
@@ -560,7 +560,7 @@ export function AdminDashboard() {
             Kembali ke App
           </button>
           <button
-            onClick={() => supabase.auth.signOut().then(() => navigate("/login"))}
+            onClick={() => authClient.signOut().then(() => navigate("/login"))}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-red-400 hover:bg-red-500/10 transition-colors"
           >
             <span className="material-symbols-outlined text-base">logout</span>

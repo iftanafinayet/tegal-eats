@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { BottomNav } from "../components/BottomNav";
 import { DesktopLayout } from "../components/DesktopLayout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "../navigation";
 import { getDiscoveryPreferences, saveDiscoveryPreferences, DiscoveryMood, DiscoveryBudget, DiscoveryOccasion, DiscoveryPreferences } from "../utils/personalization";
 import { getVisitPlanSummary, loadVisitPlans } from "../api/engagement";
 import { AppReview, AppPlace } from "../api/contracts";
@@ -17,7 +17,7 @@ import {
   updateSocialProfile,
 } from "../api/social";
 import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "../../supabaseClient";
+import { authClient } from "../../lib/auth-client";
 
 const moodOptions: { id: DiscoveryMood; label: string; hint: string }[] = [
   { id: "makan", label: "Makan", hint: "Tempat buat cari menu utama yang jelas enak." },
@@ -63,7 +63,7 @@ export function Profile() {
   const visitPlanCounts = getVisitPlanSummary();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await authClient.signOut();
     navigate("/login");
   };
 
@@ -197,20 +197,18 @@ export function Profile() {
   return (
     <DesktopLayout>
       <div className="min-h-screen bg-background text-on-surface font-body pb-32">
-        <header className="pt-20 pb-14 px-8 lg:px-12 max-w-[1400px] mx-auto relative overflow-hidden">
+        <header className="pt-20 pb-14 px-8 lg:px-12 fb-container relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 rounded-full blur-[120px] -rotate-12 translate-x-1/2" />
           <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }} className="relative z-10">
-            <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Member Snapshot</span>
+            <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Ringkasan kamu</span>
             <h1 className="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter leading-[0.88] mb-5 text-on-surface">
-              {socialProfile?.displayName?.split(" ")[0] || "Your"} profile,
-              <br />
-              <span className="text-primary italic">now with context.</span>
+              Selera, kontribusi, dan plan kamu dalam satu tempat.
             </h1>
-            <p className="text-on-surface-variant text-lg max-w-2xl">Halaman akun sekarang merangkum taste, kontribusi, dan planning kamu di Tegal Eats. Jadi ada alasan buat balik lihat progres, bukan cuma tombol logout.</p>
+            <p className="text-on-surface-variant text-lg max-w-2xl">Lihat progres review, favorit, dan rencana jalan. Bukan cuma halaman logout.</p>
           </motion.div>
         </header>
 
-        <main className="px-8 lg:px-12 max-w-[1400px] mx-auto space-y-10">
+        <main className="px-8 lg:px-12 fb-container space-y-10">
           <section className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] gap-8">
             <div className="bg-surface-container-lowest p-8 rounded-[2rem] border border-outline-variant/10">
               <div className="flex flex-col md:flex-row md:items-center gap-6">
@@ -232,7 +230,7 @@ export function Profile() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+              <div className="clay-grid grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                 <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{userReviews.length}</p><p className="text-xs text-on-surface-variant mt-1">Review</p></div>
                 <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{favoritePlaces.length}</p><p className="text-xs text-on-surface-variant mt-1">Favorit</p></div>
                 <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{visitPlanCounts.this_week}</p><p className="text-xs text-on-surface-variant mt-1">Plan minggu ini</p></div>
@@ -240,7 +238,7 @@ export function Profile() {
               </div>
 
               {socialProfile && (
-                <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="clay-grid grid grid-cols-3 gap-4 mt-4">
                   <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{socialProfile.followerCount}</p><p className="text-xs text-on-surface-variant mt-1">Follower</p></div>
                   <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{socialProfile.followingCount}</p><p className="text-xs text-on-surface-variant mt-1">Following</p></div>
                   <div className="bg-surface-container-low rounded-2xl p-4"><p className="text-2xl font-headline font-black">{socialProfile.averageRating ? socialProfile.averageRating.toFixed(1) : "0.0"}</p><p className="text-xs text-on-surface-variant mt-1">Avg rating</p></div>
@@ -252,7 +250,7 @@ export function Profile() {
               <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Taste Profile</p>
               <h2 className="text-3xl font-headline font-black mb-6">Selera yang tersimpan</h2>
               {socialProfile && <p className="text-on-surface-variant mb-6">{socialProfile.bio}</p>}
-              <div className="grid gap-4">
+              <div className="clay-grid grid gap-4">
                 <div className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10"><p className="text-xs uppercase tracking-[0.18em] text-on-surface-variant font-headline font-black mb-2">Mood utama</p><p className="font-semibold">{profileTaste[0]}</p></div>
                 <div className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10"><p className="text-xs uppercase tracking-[0.18em] text-on-surface-variant font-headline font-black mb-2">Budget</p><p className="font-semibold">{profileTaste[1]}</p></div>
                 <div className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10"><p className="text-xs uppercase tracking-[0.18em] text-on-surface-variant font-headline font-black mb-2">Konteks favorit</p><p className="font-semibold">{profileTaste[2]}</p></div>
@@ -266,12 +264,12 @@ export function Profile() {
 
           <section className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8">
             <div className="bg-surface-container-lowest p-8 rounded-[2rem] border border-outline-variant/10">
-              <div className="flex items-end justify-between gap-4 mb-6"><div><p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Recent Reviews</p><h2 className="text-3xl font-headline font-black">Kontribusi terakhir kamu</h2></div></div>
+              <div className="flex items-end justify-between gap-4 mb-6"><div><p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Ulasan kamu</p><h2 className="text-3xl font-headline font-black">Kontribusi terakhir kamu</h2></div></div>
 
               {loading ? (
                 <div className="grid md:grid-cols-2 gap-6"><div className="h-48 bg-surface-container animate-pulse rounded-[2rem]" /><div className="h-48 bg-surface-container animate-pulse rounded-[2rem]" /></div>
               ) : userReviews.length === 0 ? (
-                <div className="rounded-[2rem] border border-dashed border-outline-variant/30 p-8 text-on-surface-variant">Belum ada review. Begitu kamu mulai review, progres kontribusi akan terasa jauh lebih hidup dari sini.</div>
+                <div className="rounded-[2rem] border border-dashed border-outline-variant/30 p-8 text-on-surface-variant">Kamu belum tulis review. Satu review jujur sudah cukup ngebantu anak Tegal lain.</div>
               ) : (
                 <div className="grid md:grid-cols-2 gap-6">
                   {userReviews.slice(0, 4).map((review) => (
@@ -296,8 +294,8 @@ export function Profile() {
 
             <div className="space-y-8">
               <div className="bg-surface-container-lowest p-8 rounded-[2rem] border border-outline-variant/10">
-                <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Planner Snapshot</p>
-                <h2 className="text-3xl font-headline font-black mb-5">Pergerakan planning</h2>
+                <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Plan jalan</p>
+                <h2 className="text-3xl font-headline font-black mb-5">Yang masih wishlist dan yang harus dieksekusi</h2>
                 <div className="space-y-3">
                   {visitPlans.slice(0, 4).map((plan) => (
                     <div key={plan.placeId} className="rounded-2xl bg-surface-container-low p-4 border border-outline-variant/10">
@@ -343,7 +341,7 @@ export function Profile() {
 
         <AnimatePresence>
           {showEditProfile && (
-            <div className="fixed inset-0 z-[80] bg-black/40 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-[80] modal-overlay flex items-center justify-center p-4">
               <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="w-full max-w-lg bg-surface rounded-[2rem] p-8 border border-outline-variant/10 shadow-2xl">
                 <h2 className="text-3xl font-headline font-black mb-6">Ubah Profil</h2>
                 <div className="space-y-6">

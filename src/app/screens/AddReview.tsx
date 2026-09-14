@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "../navigation";
 import { useAuth } from "../contexts/AuthContext";
 import { uploadImage } from "../../utils/uploadImage";
 import { createReview, fetchPlaceNameById } from "../api/places";
@@ -20,7 +20,7 @@ export function AddReview() {
     const fetchPlace = async () => {
       try {
         setPlaceName(await fetchPlaceNameById(id));
-      } catch (e) {
+      } catch {
         setPlaceName("Tempat Ini");
       }
     };
@@ -90,7 +90,7 @@ export function AddReview() {
   return (
     <div className="min-h-screen bg-background text-on-surface font-body overflow-x-hidden">
       {/* Header Section */}
-      <header className="pt-20 pb-12 px-8 lg:px-12 max-w-[1400px] mx-auto relative overflow-hidden">
+      <header className="pt-20 pb-12 px-8 lg:px-12 fb-container relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 rounded-full blur-[120px] -rotate-12 translate-x-1/2" />
         
         <div className="relative z-10">
@@ -101,22 +101,20 @@ export function AddReview() {
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           
-          <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Contribution Flow</span>
+          <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Kontribusi kamu</span>
           <h1 className="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter leading-[0.88] mb-5 text-on-surface max-w-4xl">
-            Reviewing {placeName},
-            <br />
-            <span className="text-primary italic">with your signal.</span>
+            Gimana {placeName} menurut kamu.
           </h1>
-          <p className="text-on-surface-variant text-lg max-w-2xl">Kasih sinyal yang jujur. Input kamu ngebantu orang lain mutusin apakah tempat ini beneran layak didatangi atau cuma hyped doang.</p>
+          <p className="text-on-surface-variant text-lg max-w-2xl">Cerita jujur kamu ngebantu orang lain mutusin: worth it atau cuma rame doang.</p>
         </div>
       </header>
 
-      <main className="px-8 lg:px-12 max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 pb-32">
+      <main className="px-8 lg:px-12 fb-container grid grid-cols-1 lg:grid-cols-12 gap-10 pb-32">
         <div className="lg:col-span-7 space-y-8">
           {/* Rating Section */}
-          <section className="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/10">
-            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Sinyal Rating</p>
-            <h2 className="text-3xl font-headline font-black mb-8">Gimana skor akhirnya?</h2>
+          <section className="clay-card clay-lilac rounded-3xl p-8">
+            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Skor</p>
+            <h2 className="text-3xl font-headline font-black mb-8">Kasih skor dulu</h2>
             
             <div className="flex flex-wrap justify-between items-center gap-6">
               <div className="flex gap-2">
@@ -153,14 +151,14 @@ export function AddReview() {
           </section>
 
           {/* Review Text Section */}
-          <section className="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/10">
-            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Context Detail</p>
-            <h2 className="text-3xl font-headline font-black mb-6">Ceritain lebih detail</h2>
+          <section className="clay-card bg-surface-container-lowest rounded-3xl p-8">
+            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Cerita</p>
+            <h2 className="text-3xl font-headline font-black mb-6">Ceritain yang penting saja</h2>
             <div className="relative">
               <textarea
                 value={review}
                 onChange={(e) => setReview(e.target.value)}
-                placeholder="Makanannya gimana? Pelayanannya? Worth it sama harganya nggak? Semakin detail, semakin ngebantu komunitas."
+                placeholder="Makanannya gimana. Pelayanannya gimana. Harganya masuk akal atau tidak."
                 className="w-full h-48 bg-surface-container-low border border-outline-variant/10 rounded-2xl p-6 text-on-surface placeholder:text-on-surface-variant/40 outline-none focus:border-primary/30 transition-colors resize-none font-body text-lg leading-relaxed"
               />
               <div className="absolute bottom-4 right-6 text-[10px] font-headline font-black uppercase tracking-widest text-on-surface-variant opacity-40">
@@ -172,9 +170,9 @@ export function AddReview() {
 
         <div className="lg:col-span-5 space-y-8">
           {/* Photo Upload Section */}
-          <section className="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/10">
-            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Evidence</p>
-            <h2 className="text-3xl font-headline font-black mb-6">Tambah foto</h2>
+          <section className="clay-card clay-sky rounded-3xl p-8">
+            <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Bukti</p>
+            <h2 className="text-3xl font-headline font-black mb-6">Tambah bukti foto</h2>
             
             <div className="grid grid-cols-2 gap-4">
               {photos.map((photo, index) => (
@@ -202,7 +200,7 @@ export function AddReview() {
           </section>
 
           {/* Action Section */}
-          <section className="bg-surface-container-lowest rounded-[2rem] p-8 border border-outline-variant/10">
+          <section className="clay-card clay-peach rounded-3xl p-8">
             <p className="text-[10px] font-headline font-black uppercase tracking-[0.25em] text-primary mb-3">Action</p>
             <div className="space-y-4">
               <button
@@ -214,7 +212,7 @@ export function AddReview() {
                     : "bg-surface-container-high text-on-surface-variant/30 cursor-not-allowed shadow-none"
                 }`}
               >
-                {loading ? "Transmitting..." : "Post Review Now"}
+                {loading ? "Mengirim review..." : "Kirim review"}
               </button>
               
               {(rating === 0 || review.trim().length === 0) && (

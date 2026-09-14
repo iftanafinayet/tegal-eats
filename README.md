@@ -1,100 +1,66 @@
 # Tegal Eats
 
-Tegal Eats adalah app discovery kuliner dan hangout berbasis React + Supabase. Fokus produk sekarang:
-- discovery yang lebih kontekstual,
-- detail page yang bantu user ambil keputusan,
-- planner status untuk tempat favorit,
-- trust signal untuk review komunitas,
-- social graph ringan untuk follow member dan baca pulse komunitas.
-
-## Jalankan Lokal
-
-Di root project:
-
-```bash
-npm install
-npm start
-```
-
-Env yang dibutuhkan di `.env`:
-
-```env
-REACT_APP_SUPABASE_URL=...
-REACT_APP_SUPABASE_ANON_KEY=...
-REACT_APP_SUPABASE_STORAGE_BUCKET=images
-```
-
-Catatan Supabase Storage:
-- buat bucket public, misalnya `images`, lalu isi `REACT_APP_SUPABASE_STORAGE_BUCKET` dengan nama bucket itu.
-- app menyimpan `publicUrl` langsung ke database untuk `image_url`, `photo_urls`, dan `avatar_url`.
-- pastikan policy bucket mengizinkan upload untuk user yang kamu pakai di app.
-
-Untuk seed daftar coffeshop dari internet ke database lokal:
-
-```bash
-npm run seed:tegal-coffeeshops
-```
+Aplikasi discovery kuliner Tegal berbasis Next.js, Neon Postgres, Better Auth, dan Cloudinary.
 
 ## Stack
 
-- React + TypeScript
-- React Router
-- Tailwind CSS
-- Supabase Auth / Postgres / Storage
-- React Leaflet untuk map
+- Next.js 16 App Router + React 19
+- Neon serverless Postgres
+- Drizzle ORM dan Drizzle Kit
+- Better Auth (email/password, session disimpan di Neon)
+- Cloudinary untuk image storage
+- Tailwind CSS dan React Leaflet
 
-## Struktur Penting
+## Setup Lokal
 
-- `src/app/api/contracts.ts`: normalizer contract data app.
-- `src/app/api/places.ts`: helper akses data places / reviews / favorites.
-- `src/app/api/engagement.ts`: helper planner dan trust/apresiasi review.
-- `src/app/screens/*`: layar utama app.
-- `supabase/migrations/*`: SQL migration untuk schema tambahan Supabase.
+1. Salin nilai dari `.env.example` ke `.env.local`.
+2. Buat database baru di Neon dan isi `DATABASE_URL`.
+3. Buat Cloudinary environment lalu isi ketiga kredensial Cloudinary.
+4. Generate dan jalankan migration.
+5. Jalankan development server.
 
-## Supabase Migration
+```bash
+npm install
+npm run db:generate
+npm run db:migrate
+npm run dev
+```
 
-File migration baru:
+Buka `http://localhost:3000`. Pendaftaran pertama membuat user biasa. Untuk menjadikannya admin, jalankan query berikut melalui Neon SQL Editor:
 
-- `supabase/migrations/20260421_engagement_state.sql`
-- `supabase/migrations/20260421_social_graph.sql`
-- `supabase/migrations/20260421_standardize_core_contracts.sql`
+```sql
+update "user" set role = 'admin' where email = 'admin@example.com';
+```
 
-Migration ini menambahkan:
-- `user_place_states`
-- `review_appreciations`
-- `public_profiles`
-- `user_follows`
-- trigger `updated_at`
-- RLS policy per-user
+## Environment
 
-Migration standardisasi core menambahkan compatibility layer yang aman untuk:
-- `places`
-- `reviews`
-- view `app_places`
-- view `app_reviews`
-- sync `review_count` dan `avg_rating` dari tabel `reviews`
+```env
+DATABASE_URL=postgresql://user:password@host/database?sslmode=require
+BETTER_AUTH_SECRET=replace-with-at-least-32-random-characters
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
 
-Kalau kamu belum pakai Supabase CLI, isi file itu bisa langsung dijalankan di Supabase SQL Editor.
+Untuk Vercel, gunakan URL deployment sebagai `BETTER_AUTH_URL` dan `NEXT_PUBLIC_BETTER_AUTH_URL`, lalu tambahkan seluruh environment variable di Project Settings.
 
-## Tabel yang Diasumsikan Sudah Ada
+## Database
 
-Frontend saat ini sudah memakai tabel berikut:
-- `places`
-- `reviews`
-- `favorites`
+Schema aplikasi dan tabel Better Auth berada di `src/db/schema.ts`. Setelah mengubah schema:
 
-Jika migration sosial dijalankan, frontend juga akan memakai:
-- `public_profiles`
-- `user_follows`
+```bash
+npm run db:generate
+npm run db:migrate
+```
 
-Migration baru sengaja memakai `place_id` dan `review_id` bertipe `text` supaya aman walau tipe ID di schema lama belum distandardisasi.
-Untuk social graph, app tetap punya fallback ke data review publik bila tabel sosial belum tersedia.
+Operasi database hanya berjalan di route handler server. Browser mengakses `/api/data`, auth melalui `/api/auth/*`, dan upload melalui `/api/upload`.
 
 ## Verifikasi
 
-Untuk validasi lokal:
-
 ```bash
-./node_modules/.bin/tsc --noEmit --pretty false
-./node_modules/.bin/eslint src/app/api src/app/screens src/app/routes.tsx src/App.test.js --ext .ts,.tsx,.js
+npm run typecheck
+npm run lint
+npm run build
 ```

@@ -19,7 +19,7 @@ export function Skeleton({ className = "", variant = "rect" }: SkeletonProps) {
           duration: 1.5,
           ease: "linear",
         }}
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent w-full h-full"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-container/40 to-transparent w-full h-full"
       />
     </div>
   );
@@ -29,7 +29,7 @@ export function GridSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div key={i} className="bg-surface-container-low rounded-[2rem] p-4 space-y-4 border border-outline-variant/5">
+        <div key={i} className="clay-card bg-surface-container-low rounded-3xl p-4 space-y-4">
           <Skeleton className="h-48 w-full" />
           <div className="space-y-2 px-2 pb-2">
             <Skeleton variant="text" className="w-3/4" />
@@ -45,7 +45,7 @@ export function ReviewSkeleton() {
   return (
     <div className="space-y-6">
       {[1, 2].map((i) => (
-        <div key={i} className="bg-surface-container-low rounded-[2rem] p-6 border border-outline-variant/10 space-y-4">
+        <div key={i} className="clay-card bg-surface-container-low rounded-3xl p-6 space-y-4">
           <div className="flex items-center gap-4">
             <Skeleton variant="circle" className="w-12 h-12" />
             <div className="space-y-2 flex-1">

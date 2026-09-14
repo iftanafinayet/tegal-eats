@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate } from "../../navigation";
 import { useAuth } from "../../contexts/AuthContext";
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -7,7 +7,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
   // Wait for both auth AND role to be resolved before making a decision
   if (loading || roleLoading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-[#202327] flex items-center justify-center">
         <p className="text-white/40 font-mono text-sm animate-pulse">Verifying access...</p>
       </div>
     );

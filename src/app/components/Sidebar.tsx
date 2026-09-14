@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "../navigation";
 import { motion } from "motion/react";
 
 export function Sidebar() {
@@ -13,15 +13,12 @@ export function Sidebar() {
   ];
 
   return (
-    <motion.aside
-      initial={{ x: -80, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="hidden lg:flex flex-col w-72 min-h-screen bg-background fixed left-0 top-0 z-50 py-10 px-8"
+    <aside
+      className="hidden lg:flex flex-col w-[264px] h-[calc(100vh-32px)] bg-surface-bright fixed left-4 top-4 z-50 py-8 px-6 rounded-[26px] border border-white/70 shadow-clay"
     >
       {/* Brand */}
       <div 
-        className="mb-16 cursor-pointer group"
+        className="mb-12 cursor-pointer group rounded-2xl px-3 py-2 focus-within:outline-none"
         onClick={() => navigate("/home")}
       >
         <h1 className="font-headline font-black text-3xl tracking-tighter text-on-surface">
@@ -33,31 +30,31 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-4">
+      <nav className="flex-1 space-y-3" aria-label="Navigasi utama">
         {navItems.map((item) => {
           const isActive = location.pathname === item.path;
 
           return (
             <motion.button
               key={item.path}
-              whileHover={{ x: 8 }}
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => navigate(item.path)}
-              className="w-full flex items-center gap-5 py-3 group outline-none"
+              aria-current={isActive ? "page" : undefined}
+              className={`w-full flex items-center gap-4 p-3 rounded-2xl group outline-none transition-colors duration-200 ${isActive ? "text-primary" : "text-on-surface-variant hover:text-on-surface"}`}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-200 ${
                 isActive 
-                  ? "bg-primary text-on-primary shadow-lg shadow-primary/20 scale-110" 
-                  : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
+                  ? "bg-primary text-on-primary shadow-[inset_2px_2px_5px_rgba(0,0,0,.35),inset_-2px_-2px_5px_rgba(255,255,255,.16)]"
+                  : "bg-surface-bright text-on-surface-variant shadow-clay-sm group-hover:text-primary"
               }`}>
                 <span 
-                  className={`material-symbols-outlined text-[20px] transition-all duration-300 ${isActive ? 'rotate-12' : 'group-hover:rotate-12'}`}
+                  className="material-symbols-outlined text-[21px] transition-colors duration-200"
                   style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
                 >
                   {item.icon}
                 </span>
               </div>
-              <span className={`font-headline uppercase tracking-widest text-xs transition-all ${
+              <span className={`font-headline uppercase tracking-[0.16em] text-[11px] transition-colors ${
                 isActive ? "font-black text-on-surface" : "font-bold text-on-surface-variant group-hover:text-on-surface"
               }`}>
                 {item.label}
@@ -69,12 +66,12 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="mt-8">
-        <div className="w-12 h-1 bg-outline-variant/20 rounded-full mb-6"></div>
+        <div className="w-full h-px bg-outline-variant/20 shadow-[0_1px_0_rgba(255,255,255,.55)] mb-6"></div>
         <p className="font-headline font-bold text-[10px] uppercase tracking-widest text-on-surface-variant/40">
           © 2026 TegalEats <br/>
           Curated Discovery
         </p>
       </div>
-    </motion.aside>
+    </aside>
   );
 }

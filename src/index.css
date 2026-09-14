@@ -1,24 +1,344 @@
 @import "leaflet/dist/leaflet.css";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,800&family=Be+Vietnam+Pro:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
-
 body {
   margin: 0;
-  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: "Plus Jakarta Sans", Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f9f6f4;
-  color: #2f2f2e;
+  color: #20252a;
+  background: linear-gradient(180deg, #ddf5ff 0%, #f8fcfe 100%);
+  background-color: #eaf8ff;
+  background-attachment: fixed;
+  min-width: 320px;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+:root {
+  --primary-100: #ddf4ff;
+  --primary-300: #74d1f7;
+  --primary-500: #27aeeb;
+  --primary-600: #148ed1;
+
+  --canvas: #eaf8ff;
+  --surface: #ffffff;
+  --surface-soft: #f7fbfd;
+
+  --text-primary: #20252a;
+  --text-secondary: #4d5a64;
+  --text-muted: #7d8b94;
+
+  --accent-mango: #ffc83d;
+  --accent-coral: #ff6b72;
+  --accent-mint: #55d6be;
+  --accent-grape: #9075e8;
+  --accent-orange: #ff9b50;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  --gradient-primary: linear-gradient(135deg, #45c4f3 0%, #168fd4 100%);
+  --gradient-promo: linear-gradient(135deg, #20a8e8 0%, #2fb9ee 72%, #ffc83d 72%);
+  --gradient-background: linear-gradient(180deg, #ddf5ff 0%, #f8fcfe 100%);
+
+  --shadow-card: 14px 18px 36px rgba(37, 139, 187, 0.16), -8px -8px 22px rgba(255, 255, 255, 0.85);
+  --shadow-button: 0 10px 20px rgba(20, 142, 209, 0.30), inset 0 2px 2px rgba(255, 255, 255, 0.38), inset 0 -3px 6px rgba(4, 103, 160, 0.18);
+  --shadow-floating: 0 14px 32px rgba(32, 130, 180, 0.28), inset 0 2px 3px rgba(255, 255, 255, 0.42);
+  --shadow-inset: inset 3px 3px 8px rgba(87, 139, 163, 0.10), inset -3px -3px 8px rgba(255, 255, 255, 0.90);
+
+  --clay-bg: #eaf8ff;
+  --clay-raised: 14px 18px 36px rgba(37, 139, 187, 0.16), -8px -8px 22px rgba(255, 255, 255, 0.85);
+  --clay-raised-sm: 0 8px 18px rgba(37, 139, 187, 0.14), inset 0 2px 2px rgba(255, 255, 255, 0.5);
+  --clay-pressed: inset 3px 3px 8px rgba(87, 139, 163, 0.10), inset -3px -3px 8px rgba(255, 255, 255, 0.90);
+  --clay-border: rgba(255, 255, 255, 0.72);
+  --clay-focus: rgba(39, 174, 235, 0.35);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(116, 209, 247, 0.28), transparent 26rem),
+    radial-gradient(circle at 88% 16%, rgba(255, 200, 61, 0.16), transparent 24rem),
+    radial-gradient(circle at 86% 88%, rgba(144, 117, 232, 0.12), transparent 30rem);
+}
+
+button,
+[role="button"],
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+[role="button"],
+a[href] {
+  cursor: pointer;
+}
+
+:where(button, a, input, textarea, select):focus-visible {
+  outline: 3px solid rgba(20, 142, 209, 0.9) !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(221, 244, 255, 0.9) !important;
+}
+
+/* Food-first imagery: consistent crop, cover, card-following radius. */
+img {
+  object-fit: cover;
+}
+
+.fb-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bg-surface-container-lowest {
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  background-color: #ffffff !important;
+  box-shadow: var(--shadow-card);
+}
+
+[class*="bg-surface-container-lowest/"] {
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  box-shadow: var(--shadow-card);
+}
+
+.bg-surface-container-low,
+.bg-surface-container,
+.bg-surface-container-high {
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Search field: 48px, surface-soft, inset used sparingly. */
+:where(input, textarea, select).bg-surface-container-lowest,
+:where(input, textarea, select).bg-surface-container-low,
+:where(input, textarea, select).bg-surface-container-high {
+  min-height: 48px;
+  border: 0 !important;
+  background-color: #f7fbfd !important;
+  box-shadow: var(--shadow-inset) !important;
+}
+
+button.bg-surface-container-low,
+button.bg-surface-container-high,
+button.bg-surface-bright {
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--clay-raised-sm);
+  transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+button.bg-surface-container-low:active,
+button.bg-surface-container-high:active,
+button.bg-surface-bright:active {
+  transform: scale(0.98);
+  box-shadow: var(--clay-pressed);
+}
+
+/* Primary button: 48-52px, gradient blue, clay button shadow. */
+button.bg-primary,
+a.bg-primary {
+  min-height: 48px;
+  border: 0;
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #45c4f3 0%, #168fd4 100%) !important;
+  box-shadow: var(--shadow-button);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), filter 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+button.bg-primary:hover,
+a.bg-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+}
+
+button.bg-primary:active,
+a.bg-primary:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--shadow-inset);
+}
+
+.primary-button {
+  min-height: 48px;
+  padding: 0 24px;
+  color: #fff;
+  background: var(--gradient-primary);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-button);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 200ms ease, filter 200ms ease, box-shadow 200ms ease;
+}
+
+/* Secondary button: white / primary-100 surface, primary-600 text. */
+.secondary-button {
+  min-height: 48px;
+  padding: 0 24px;
+  color: #148ed1;
+  background: #ffffff;
+  border: 1px solid rgba(20, 142, 209, 0.18);
+  border-radius: 16px;
+  box-shadow: var(--clay-raised-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Category chip: pill, white default, blue active. */
+.category-chip {
+  min-height: 44px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #4d5a64;
+  box-shadow: var(--clay-raised-sm);
+}
+
+.category-chip-active {
+  background: #27aeeb;
+  color: #ffffff;
+}
+
+/* Promo banner: blue gradient with mango accent zone. */
+.promo-banner {
+  background: linear-gradient(135deg, #20a8e8 0%, #2fb9ee 72%, #ffc83d 72%);
+  color: #ffffff;
+}
+
+/* Modal overlay: dim blue + blur; glass only on overlay. */
+.modal-overlay {
+  background: rgba(16, 43, 56, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+.clay-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+/* Bold F&B accents: mango promo, sky info, mint fresh, grape dessert. Solid and vivid, never washed out. */
+.clay-peach {
+  border-color: #f0505a !important;
+  background: #ff8f96 !important;
+}
+
+.clay-sky {
+  border-color: #1493d4 !important;
+  background: #4fbeef !important;
+}
+
+.clay-mint {
+  border-color: #1ea87e !important;
+  background: #3fdcab !important;
+}
+
+.clay-lilac {
+  border-color: #6f51d8 !important;
+  background: #a68cf0 !important;
+}
+
+.clay-grid > * {
+  border-width: 3px !important;
+  border-style: solid;
+  box-shadow: 0 10px 20px rgba(37, 139, 187, 0.16), inset 2px 2px 5px rgba(255, 255, 255, 0.55), inset -3px -3px 7px rgba(32, 37, 42, 0.12) !important;
+}
+
+.clay-card.clay-peach,
+.clay-card.clay-sky,
+.clay-card.clay-mint,
+.clay-card.clay-lilac {
+  box-shadow: 0 12px 24px rgba(37, 139, 187, 0.18), inset 2px 2px 6px rgba(255, 255, 255, 0.5), inset -4px -4px 8px rgba(32, 37, 42, 0.1) !important;
+}
+.clay-grid > :nth-child(4n + 1) { border-color: #f0b429 !important; background-color: #ffd166 !important; }
+.clay-grid > :nth-child(4n + 2) { border-color: #1493d4 !important; background-color: #4fbeef !important; }
+.clay-grid > :nth-child(4n + 3) { border-color: #1ea87e !important; background-color: #3fdcab !important; }
+.clay-grid > :nth-child(4n + 4) { border-color: #6f51d8 !important; background-color: #a68cf0 !important; }
+
+
+
+.leaflet-container {
+  background: #e7f2fa;
+}
+
+.leaflet-control-zoom,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  background: #ffffff !important;
+  box-shadow: var(--clay-raised-sm) !important;
+}
+
+/* Prices bold, descriptions max 2 lines in cards. */
+.price-strong {
+  font-weight: 700;
+}
+
+.menu-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Touch targets at least 44px; body copy at least 15px on mobile. */
+button,
+a[href],
+[role="button"] {
+  min-height: 44px;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .bg-surface-container-lowest {
+    box-shadow: 0 7px 16px rgba(79, 70, 229, 0.12), inset -2px -2px 6px rgba(196, 202, 238, 0.28), inset 2px 2px 6px rgba(255, 255, 255, 0.86);
+  }
+}
+
+.admin-neo [class*="bg-white/5"] {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+  background-color: #292d31 !important;
+  box-shadow: -6px -6px 14px rgba(255, 255, 255, 0.025), 7px 7px 16px rgba(0, 0, 0, 0.3);
+}
+
+.admin-neo :where(input, textarea, select) {
+  background-color: #1d2023 !important;
+  box-shadow: inset 3px 3px 7px rgba(0, 0, 0, 0.38), inset -3px -3px 7px rgba(255, 255, 255, 0.035);
 }

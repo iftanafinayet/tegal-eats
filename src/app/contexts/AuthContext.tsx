@@ -1,14 +1,13 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { User, Session } from "@supabase/supabase-js";
-import { supabase } from "../../supabaseClient";
+"use client";
 
-const AUTH_BOOT_TIMEOUT_MS = 8000;
+import { createContext, useContext, ReactNode } from "react";
+import { authClient, AuthUser } from "../../lib/auth-client";
 
 export type UserRole = "admin" | "user" | null;
 
 type AuthContextType = {
-  user: User | null;
-  session: Session | null;
+  user: AuthUser | null;
+  session: { id: string; userId: string; expiresAt: Date } | null;
   loading: boolean;
   roleLoading: boolean;
   ready: boolean;
@@ -28,107 +27,18 @@ const AuthContext = createContext<AuthContextType>({
   defaultRoute: "/home",
 });
 
-async function fetchUserRole(userId: string): Promise<UserRole> {
-  const { data, error } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .maybeSingle();
-
-  if (error) {
-    console.error("Failed to fetch user role:", error);
-    return "user";
-  }
-
-  return (data?.role as UserRole) ?? "user";
-}
-
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timeoutId = window.setTimeout(() => {
-      reject(new Error(`${label} timed out after ${timeoutMs}ms`));
-    }, timeoutMs);
-
-    promise
-      .then((value) => resolve(value))
-      .catch((error) => reject(error))
-      .finally(() => window.clearTimeout(timeoutId));
-  });
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [roleLoading, setRoleLoading] = useState(true);
-  const [role, setRole] = useState<UserRole>(null);
-
-  useEffect(() => {
-    let alive = true;
-
-    const syncAuthState = async (nextSession: Session | null) => {
-      if (!alive) return;
-
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
-      setLoading(false);
-      setRoleLoading(true);
-
-      try {
-        if (nextSession?.user) {
-          const nextRole = await withTimeout(
-            fetchUserRole(nextSession.user.id),
-            AUTH_BOOT_TIMEOUT_MS,
-            "Fetch user role"
-          );
-
-          if (alive) setRole(nextRole);
-        } else if (alive) {
-          setRole(null);
-        }
-      } catch (error) {
-        console.error("Failed to sync auth role:", error);
-        if (alive) setRole(nextSession?.user ? "user" : null);
-      } finally {
-        if (alive) setRoleLoading(false);
-      }
-    };
-
-    const bootstrapAuth = async () => {
-      try {
-        const { data } = await withTimeout(
-          supabase.auth.getSession(),
-          AUTH_BOOT_TIMEOUT_MS,
-          "Initial auth session"
-        );
-
-        await syncAuthState(data.session);
-      } catch (error) {
-        console.error("Failed to bootstrap auth session:", error);
-        if (!alive) return;
-        setSession(null);
-        setUser(null);
-        setRole(null);
-        setLoading(false);
-        setRoleLoading(false);
-      }
-    };
-
-    bootstrapAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-      await syncAuthState(nextSession);
-    });
-
-    return () => {
-      alive = false;
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const ready = !loading && !roleLoading;
+  const { data, isPending } = authClient.useSession();
+  const rawUser = data?.user as (NonNullable<typeof data>["user"] & { role?: string }) | undefined;
+  const user: AuthUser | null = rawUser ? {
+    ...rawUser,
+    user_metadata: { full_name: rawUser.name, avatar_url: rawUser.image || undefined },
+  } : null;
+  const session = data?.session ? { id: data.session.id, userId: data.session.userId, expiresAt: data.session.expiresAt } : null;
+  const loading = isPending;
+  const roleLoading = isPending;
+  const role = (rawUser?.role === "admin" ? "admin" : rawUser ? "user" : null) as UserRole;
+  const ready = !isPending;
   const isAdmin = role === "admin";
   const defaultRoute = isAdmin ? "/admin" : "/home";
 

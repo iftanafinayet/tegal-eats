@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "../navigation";
 import { uploadImage } from "../../utils/uploadImage";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { createPlace } from "../api/places";
 
@@ -76,7 +75,7 @@ type SearchSuggestion = {
 
 export function AddPlace() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const [name, setName] = useState("");
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
@@ -339,12 +338,11 @@ export function AddPlace() {
             <span className="material-symbols-outlined text-primary">arrow_back</span>
           </button>
 
-          <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Community</span>
+          <span className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-4 block underline decoration-primary/30 underline-offset-8">Dari komunitas</span>
           <h1 className="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter leading-[0.85] mb-4 text-on-surface">
-            Curate A <br />
-            <span className="text-primary italic">Hidden Gem.</span>
+            Tau hidden gem yang belum ada di sini.
           </h1>
-          <p className="text-on-surface-variant max-w-md mt-6 text-sm">Add a new premium location to the Tegal Eats interactive map for others to explore.</p>
+          <p className="text-on-surface-variant max-w-md mt-6 text-sm">Tambahin tempatnya sekali. Biar anak Tegal lain bisa nemu dan nilai bareng.</p>
         </div>
       </header>
 
@@ -352,7 +350,7 @@ export function AddPlace() {
       <main className="px-8 lg:px-12 max-w-4xl mx-auto">
         <form onSubmit={handleSubmit} className="space-y-10">
 
-          <div className="bg-surface-bright p-8 md:p-12 rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.02)] border border-outline-variant/5">
+          <div className="clay-card bg-surface-bright p-8 md:p-12 rounded-3xl">
             <div className="space-y-8">
               {/* Basic Info */}
               <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative z-50">
@@ -517,7 +515,7 @@ export function AddPlace() {
           </div>
 
           {/* Interactive Map Picker */}
-          <div className="bg-surface-bright p-8 md:p-12 rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.02)] border border-outline-variant/5">
+          <div className="clay-card clay-sky p-8 md:p-12 rounded-3xl">
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
               <div className="flex justify-between items-end mb-6">
                 <div>

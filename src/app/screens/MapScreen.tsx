@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { BottomNav } from "../components/BottomNav";
 import { DesktopLayout } from "../components/DesktopLayout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "../navigation";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { fetchMapPlaces } from "../api/places";
@@ -40,7 +40,7 @@ function CustomMapControls() {
       {/* Add Spot Button */}
       <button 
         onClick={() => navigate('/add-place')}
-        className="bg-primary text-on-primary px-5 py-3 rounded-full shadow-[0_10px_20px_rgba(255,111,0,0.3)] pointer-events-auto hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group"
+        className="bg-primary text-on-primary px-5 py-3 rounded-full shadow-[0_10px_20px_rgba(32,36,42,0.24)] pointer-events-auto hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group"
       >
         <span className="material-symbols-outlined text-[20px] group-hover:rotate-12 transition-transform">add_location_alt</span>
         <span className="font-headline font-bold text-xs uppercase tracking-widest hidden md:inline-block">Add Gem</span>
@@ -73,11 +73,69 @@ function CustomMapControls() {
   );
 }
 
+function SelectedPlaceCard({ place, onClose }: { place: MapMarker; onClose: () => void }) {
+  const navigate = useNavigate();
+
+  return (
+    <div className="clay-card bg-surface-container-lowest w-full rounded-3xl overflow-hidden relative">
+      <div className="relative h-40 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center -mt-px overflow-hidden">
+         {place.imageUrl ? (
+           <img src={place.imageUrl} alt={place.name} className="w-full h-full object-cover" />
+         ) : (
+           <span className="material-symbols-outlined text-6xl text-primary/30 rotate-12 relative -top-4">
+             {place.category === 'coffee' ? 'coffee' : 'restaurant'}
+           </span>
+         )}
+         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-surface-container-lowest to-transparent" />
+         <button
+           onClick={(e) => { e.stopPropagation(); onClose(); }}
+           aria-label="Tutup detail"
+           className="absolute top-4 right-4 min-w-[44px] min-h-[44px] bg-surface/50 backdrop-blur-md p-1.5 rounded-full hover:bg-surface transition-all shadow-sm focus:outline-none flex items-center justify-center"
+         >
+           <span className="material-symbols-outlined text-sm text-on-surface">close</span>
+         </button>
+      </div>
+
+      <div className="p-6 pt-2 relative z-10">
+        <div className="bg-primary text-on-primary text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-sm inline-block mb-3 shadow-md">
+           Curated Gem
+        </div>
+        <h4 className="font-headline font-bold text-2xl text-on-surface leading-tight mb-1">{place.name}</h4>
+        <p className="text-sm text-on-surface-variant mb-5">Tegal, Central Java</p>
+
+        <div className="flex items-center gap-4 py-4 border-y border-outline-variant/10 bg-surface-bright/50 rounded-lg">
+          <div className="text-center flex-1">
+            <p className="text-[9px] text-on-surface-variant uppercase tracking-[0.2em] font-black mb-1">Status</p>
+            <p className={`text-sm font-bold flex items-center justify-center gap-1 ${isPlaceOpenNow(place.hours || "") ? "text-primary" : "text-on-surface-variant"}`}>
+              {isPlaceOpenNow(place.hours || "") ? "Buka" : "Tutup"}
+            </p>
+          </div>
+          <div className="w-px h-8 bg-outline-variant/20"></div>
+          <div className="text-center flex-1">
+            <p className="text-[9px] text-on-surface-variant uppercase tracking-[0.2em] font-black mb-1">Rating</p>
+            <p className="text-sm font-bold text-on-surface flex items-center justify-center gap-1">
+              <span className="material-symbols-outlined text-[14px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              {place.avg_rating || "4.5"}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => navigate(`/detail/${place.id}`)}
+          className="w-full mt-6 bg-primary hover:bg-primary/90 text-on-primary py-3.5 rounded-xl font-headline font-bold active:scale-[0.98] transition-all shadow-clay-button flex items-center justify-center gap-2"
+        >
+          <span>Lihat detail tempat</span>
+          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function MapScreen() {
   const [mapMarkers, setMapMarkers] = useState<MapMarker[]>([]);
   const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
   const [selectedCoords, setSelectedCoords] = useState<[number, number] | undefined>(undefined);
-  const navigate = useNavigate();
 
   useEffect(() => {
     let cancelled = false;
@@ -148,35 +206,28 @@ export function MapScreen() {
 
   return (
     <DesktopLayout>
-    <div className="h-screen bg-background text-on-surface font-body overflow-hidden flex flex-col">
-        {/* TopAppBar */}
-        <header className="w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/10 shadow-sm shrink-0">
-          <div className="flex justify-between items-center px-6 py-4 w-full max-w-7xl mx-auto">
-            <div className="flex items-center gap-8">
-              <span className="text-xl font-black text-primary font-headline italic tracking-tight">Gourmet Socialite</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex gap-2">
-                <span className="material-symbols-outlined text-primary cursor-pointer p-2 rounded-full hover:bg-primary/10 transition-colors">notifications</span>
-                <span className="material-symbols-outlined text-primary cursor-pointer p-2 rounded-full hover:bg-primary/10 transition-colors">favorite</span>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-background text-on-surface font-body pb-28 md:pb-10">
+        <header className="pt-8 md:pt-12 pb-8 px-4 md:px-6 lg:px-8 fb-container">
+          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }} className="clay-card rounded-[32px] bg-surface-bright p-6 md:p-8">
+            <p className="font-headline font-black text-primary italic tracking-widest uppercase text-xs mb-3 block underline decoration-primary/30 underline-offset-8">Peta kuliner</p>
+            <h1 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface tracking-tight leading-[1.05] mb-3 max-w-3xl">Jelajahi Tegal dari peta.</h1>
+            <p className="text-on-surface-variant text-base md:text-lg max-w-2xl">{mapMarkers.length} spot sudah dikurasi. Ketuk pin buat lihat kenapa tempat itu layak.</p>
+          </motion.div>
         </header>
 
-        <main className="flex-1 flex overflow-hidden lg:flex-row flex-col-reverse">
+        <main className="px-4 md:px-6 lg:px-8 fb-container grid gap-6 lg:grid-cols-[400px_1fr] lg:items-start">
           {/* Main Content: Map */}
-          <section className="flex-1 relative bg-surface-container-highest z-10 w-full h-[60vh] lg:h-auto">
+          <section className="clay-card relative z-10 w-full h-[52vh] lg:h-[calc(100vh-240px)] lg:sticky lg:top-6 overflow-hidden rounded-[32px] order-first lg:order-last">
             <MapContainer
               center={[-6.8694, 109.1402]} // Tegal City coordinates
               zoom={14}
               className="w-full h-full absolute inset-0 z-0"
               zoomControl={false}
             >
-              {/* Premium Map Tiles from CARTO */}
+              {/* Free OSM tiles, no API key needed */}
               <TileLayer
-                attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
 
               <MapController selectedCoords={selectedCoords} />
@@ -198,29 +249,46 @@ export function MapScreen() {
 
               <CustomMapControls />
             </MapContainer>
+
+            {/* Selected place card, overlays the map */}
+            <AnimatePresence>
+              {selectedMarker && selectedPlace && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="absolute bottom-6 left-4 right-4 z-30 max-w-sm mx-auto lg:mx-0"
+                >
+                  <SelectedPlaceCard
+                    place={selectedPlace}
+                    onClose={() => setSelectedMarker(null)}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
-          
-          {/* Sidebar: Saved Places List (Absolute on Mobile, Sidebar on Desktop) */}
-          <AnimatePresence mode="wait">
-            {!selectedMarker && (
-              <motion.aside
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -20, opacity: 0 }}
-                className="w-full lg:w-[400px] h-[40vh] lg:h-full lg:overflow-y-auto bg-surface-container-lowest lg:bg-surface-container-low/50 lg:backdrop-blur-md px-6 py-8 z-20 border-r border-outline-variant/10 shadow-t-2xl lg:shadow-none overflow-y-auto"
-              >
-                <div className="mb-8">
-                  <h1 className="text-3xl font-headline font-extrabold text-on-surface tracking-tight leading-tight hidden lg:block">My Saved Gems</h1>
-                  <h1 className="text-2xl font-headline font-extrabold text-on-surface tracking-tight leading-tight lg:hidden">Explore Tegal</h1>
-                  <p className="text-sm text-on-surface-variant mt-2">{mapMarkers.length} spots curated</p>
-                </div>
-                <div className="space-y-4 lg:space-y-6">
-                  {mapMarkers.map((marker) => (
-                    <div
-                      key={marker.id}
-                      onClick={() => handleSelectMarker(marker.id)}
-                      className="bg-surface p-4 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.03)] hover:shadow-md transition-all cursor-pointer group border border-outline-variant/10"
-                    >
+
+          {/* Sidebar: Saved Places List, always visible */}
+          <motion.aside
+            initial={{ y: 12, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="w-full z-20 lg:max-h-[calc(100vh-240px)] lg:overflow-y-auto lg:pr-1"
+          >
+            {mapMarkers.length === 0 ? (
+              <div className="clay-card bg-surface-bright p-8 rounded-3xl text-center">
+                <span className="material-symbols-outlined text-5xl text-on-surface-variant opacity-30 mb-3 block">map</span>
+                <h2 className="font-headline font-bold text-xl mb-2">Belum ada tempat di peta</h2>
+                <p className="text-sm text-on-surface-variant">Tambahin hidden gem pertama biar peta ini keisi.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {mapMarkers.map((marker) => (
+                  <div
+                    key={marker.id}
+                    onClick={() => handleSelectMarker(marker.id)}
+                    aria-current={selectedMarker === marker.id ? "true" : undefined}
+                    className={`clay-card bg-surface-bright p-4 rounded-3xl transition-[box-shadow,transform] active:scale-[0.97] active:shadow-clay-pressed cursor-pointer group ${selectedMarker === marker.id ? "outline outline-2 outline-primary" : ""}`}
+                  >
                       <div className="flex gap-4">
                         <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-lg bg-surface-container flex items-center justify-center overflow-hidden flex-shrink-0">
                           {marker.imageUrl ? (
@@ -242,73 +310,8 @@ export function MapScreen() {
                     </div>
                   ))}
                 </div>
-              </motion.aside>
-            )}
-          </AnimatePresence>
-
-          {/* Floating Active Card (Desktop & Mobile) */}
-          <AnimatePresence>
-            {selectedMarker && selectedPlace && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                className="absolute bottom-28 w-[calc(100%-2rem)] left-4 lg:bottom-auto lg:top-[30%] lg:left-[420px] z-30 max-w-sm"
-              >
-                <div className="bg-surface-container-lowest w-full rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.2)] overflow-hidden border border-outline-variant/10 relative">
-                  <div className="relative h-40 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center -mt-px overflow-hidden">
-                     {selectedPlace.imageUrl ? (
-                       <img src={selectedPlace.imageUrl} alt={selectedPlace.name} className="w-full h-full object-cover" />
-                     ) : (
-                       <span className="material-symbols-outlined text-6xl text-primary/30 rotate-12 relative -top-4">
-                         {selectedPlace.category === 'coffee' ? 'coffee' : 'restaurant'}
-                       </span>
-                     )}
-                     <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-surface-container-lowest to-transparent" />
-                     <button
-                       onClick={(e) => { e.stopPropagation(); setSelectedMarker(null); }}
-                       className="absolute top-4 right-4 bg-surface/50 backdrop-blur-md p-1.5 rounded-full hover:bg-surface transition-all shadow-sm focus:outline-none"
-                     >
-                       <span className="material-symbols-outlined text-sm text-on-surface">close</span>
-                     </button>
-                  </div>
-
-                  <div className="p-6 pt-2 relative z-10">
-                    <div className="bg-primary text-on-primary text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-1 rounded-sm inline-block mb-3 shadow-md">
-                       Curated Gem
-                    </div>
-                    <h4 className="font-headline font-bold text-2xl text-on-surface leading-tight mb-1">{selectedPlace.name}</h4>
-                    <p className="text-sm text-on-surface-variant mb-5">Tegal, Central Java</p>
-
-                    <div className="flex items-center gap-4 py-4 border-y border-outline-variant/10 bg-surface-bright/50 rounded-lg">
-                      <div className="text-center flex-1">
-                        <p className="text-[9px] text-on-surface-variant uppercase tracking-[0.2em] font-black mb-1">Status</p>
-                        <p className={`text-sm font-bold flex items-center justify-center gap-1 ${isPlaceOpenNow(selectedPlace.hours || "") ? "text-primary" : "text-on-surface-variant"}`}>
-                          {isPlaceOpenNow(selectedPlace.hours || "") ? "Buka" : "Tutup"}
-                        </p>
-                      </div>
-                      <div className="w-px h-8 bg-outline-variant/20"></div>
-                      <div className="text-center flex-1">
-                        <p className="text-[9px] text-on-surface-variant uppercase tracking-[0.2em] font-black mb-1">Rating</p>
-                        <p className="text-sm font-bold text-on-surface flex items-center justify-center gap-1">
-                          <span className="material-symbols-outlined text-[14px] text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                          {selectedPlace.avg_rating || "4.5"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => navigate(`/detail/${selectedPlace.id}`)}
-                      className="w-full mt-6 bg-primary hover:bg-primary/90 text-on-primary py-3.5 rounded-xl font-headline font-bold hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_20px_rgba(255,111,0,0.2)] flex items-center justify-center gap-2"
-                    >
-                      <span>Explore Detail</span>
-                      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+            </motion.aside>
 
         </main>
         

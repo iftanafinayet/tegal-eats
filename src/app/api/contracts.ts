@@ -125,7 +125,7 @@ export function isPlaceOpenNow(hours: string) {
     const [endH, endM] = parts[1].split(":").map(Number);
 
     const startTime = startH * 60 + startM;
-    let endTime = endH * 60 + endM;
+    const endTime = endH * 60 + endM;
 
     // Handle overnight hours (e.g., 15:00 - 03:00)
     if (endTime < startTime) {
@@ -133,7 +133,7 @@ export function isPlaceOpenNow(hours: string) {
     }
 
     return currentTime >= startTime && currentTime <= endTime;
-  } catch (e) {
+  } catch {
     return true; // Fallback
   }
 }
